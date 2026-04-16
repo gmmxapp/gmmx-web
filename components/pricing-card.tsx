@@ -6,35 +6,53 @@ type PricingCardProps = {
 };
 
 export function PricingCard({ plan }: PricingCardProps) {
+  const isPop = plan.isPopular;
+  
   return (
     <article
-      className={`relative flex h-full flex-col rounded-3xl border p-6 shadow-xl transition hover:-translate-y-1 ${
-        plan.isPopular
-          ? "border-rose-300 bg-gradient-to-b from-white to-rose-50 dark:border-rose-500/50 dark:from-slate-900 dark:to-rose-950/20"
-          : "border-slate-200 bg-white/80 dark:border-slate-700 dark:bg-slate-900/70"
+      className={`relative flex h-full flex-col rounded-[2rem] p-[1px] transition-transform duration-300 hover:-translate-y-1 ${
+        isPop ? "bg-gradient-to-b from-[#A855F7] to-transparent shadow-[0_0_40px_rgba(168,85,247,0.2)]" : "bg-white/5"
       }`}
     >
-      {plan.badge ? (
-        <span className="mb-3 inline-flex w-fit rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-rose-600 dark:border-rose-500/30 dark:bg-rose-950/30 dark:text-rose-300">
-          {plan.badge}
-        </span>
-      ) : null}
-      <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100">{plan.name}</h3>
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{plan.description}</p>
-      <p className="mt-4 text-4xl font-black text-slate-900 dark:text-white">{formatInr(plan.amountInPaise)}</p>
-      <p className="text-sm text-slate-500 dark:text-slate-400">per month</p>
+      {/* Outer gradient wrapper acts as the border. Inner keeps it dark. */}
+      <div className="relative flex h-full flex-col overflow-hidden rounded-[2rem] bg-[#05050A] p-8">
+        
+        {/* Subtle internal grid for Wope card aesthetic */}
+        <div className="absolute inset-x-0 top-0 h-48 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:2rem_2rem] [mask-image:linear-gradient(to_bottom,black_10%,transparent)] pointer-events-none" />
 
-      <ul className="mt-5 grow space-y-2 text-sm text-slate-600 dark:text-slate-300">
-        {plan.features.map((feature) => (
-          <li key={feature} className="flex items-center gap-2">
-            <span className="text-rose-500">●</span>
-            <span>{feature}</span>
-          </li>
-        ))}
-      </ul>
+        {isPop && plan.badge && (
+          <div className="absolute -top-[1px] left-8 rounded-b-xl bg-[#A855F7] px-4 py-1.5 text-[0.65rem] font-bold uppercase tracking-widest text-white shadow-lg">
+            TRY IT WITHOUT A CREDIT CARD!
+          </div>
+        )}
+        
+        <div className="relative z-10 mt-6">
+          <h3 className="text-3xl font-bold text-white">{plan.name}</h3>
+          <p className="mt-2 text-sm font-medium text-slate-400">{plan.description}</p>
+          
+          <div className="mt-6 flex items-baseline gap-1 relative border-b border-white/5 pb-8">
+            <p className="text-4xl font-bold text-white">{formatInr(plan.amountInPaise)}</p>
+            <p className="text-sm font-medium tracking-wide text-slate-500">/month</p>
+          </div>
 
-      <div className="mt-6">
-        <PaymentModal plan={plan} />
+          <div className="mt-8">
+            <PaymentModal plan={plan} />
+          </div>
+
+          <div className="mt-8 relative">
+             <p className="mb-4 text-xs font-bold uppercase tracking-widest text-[#A855F7]">RESEARCH / FEATURES</p>
+            <ul className="mb-8 grow space-y-4 text-sm">
+              {plan.features.map((feature) => (
+                <li key={feature} className="flex items-center gap-3">
+                  <svg className="h-4 w-4 shrink-0 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="font-medium text-slate-300">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
     </article>
   );

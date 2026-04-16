@@ -1,69 +1,120 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { useState } from "react";
 
 const navItems = [
   { href: "/#features", label: "Features" },
-  { href: "/makesite", label: "Own website" },
-  { href: "/#clients", label: "Clients" },
-  { href: "/#pricing", label: "Pricing" },
-  { href: "/#faq", label: "FAQ" }
+  { href: "/makesite", label: "Microsites" },
+  { href: "/#clients", label: "Testimonials" },
+  { href: "/#pricing", label: "Pricing" }
 ];
 
 export function Navbar() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-[#071225]/85 backdrop-blur-md">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2" aria-label="Go to home page">
-          <Image
-            src="/samplelogo.jpg"
-            alt="GMMX logo"
-            width={40}
-            height={40}
-            className="h-10 w-10 rounded-xl object-cover"
-          />
-          <div>
-            <p className="text-sm font-extrabold text-white">GMMX</p>
-            <p className="text-xs text-slate-300">Gym Growth OS</p>
+    <header className="sticky top-0 z-50 w-full border-b border-transparent bg-[#05050A]/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        
+        {/* Left: Logo */}
+        <Link href="/" className="flex items-center gap-3 shrink-0" aria-label="Gmmx Home">
+          <div className="relative h-14 w-14 overflow-hidden">
+            <Image
+              src="/logo-trans.png"
+              alt="Gmmx logo"
+              fill
+              sizes="56px"
+              className="object-contain scale-[1.7]"
+            />
+          </div>
+          <div className="flex flex-col justify-center">
+            <span className="text-2xl font-extrabold leading-none tracking-tighter text-white sm:text-[1.75rem]">Gmmx</span>
+            <span className="mt-1 text-[0.55rem] font-bold uppercase tracking-[0.2em] text-[#FF5C73]">Gym Management System</span>
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-6 lg:flex">
+        {/* Center: Desktop Navigation */}
+        <nav className="hidden items-center gap-8 md:flex">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm font-medium text-slate-300 transition hover:text-white"
+              className="text-sm font-medium text-slate-400 transition-colors hover:text-white"
             >
               {item.label}
             </Link>
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
+        {/* Right: Actions */}
+        <div className="flex items-center gap-4 shrink-0">
           <Link
             href="/login"
-            className="hidden rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/40 sm:inline-flex"
+            className="hidden text-sm font-semibold text-slate-300 transition-colors hover:text-white md:block"
           >
-            Login
+            Log in
           </Link>
           <Link
             href="/signup"
-            className="rounded-xl bg-[#FF5C73] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#FF5C73]/30 transition hover:-translate-y-0.5"
+            className="hidden md:flex rounded-lg bg-[#FF5C73] px-5 py-2.5 text-sm font-bold tracking-wide text-white transition-all hover:opacity-90 hover:shadow-[0_0_20px_rgba(255,92,115,0.4)]"
           >
             Start free
           </Link>
+          
+          {/* Hamburger Menu Toggle (Mobile Only) */}
+          <button 
+            type="button"
+            className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-slate-400 hover:bg-white/5 hover:text-white"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <span className="sr-only">Open main menu</span>
+            {mobileMenuOpen ? (
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-7xl gap-5 overflow-x-auto px-4 pb-3 text-sm text-slate-200 lg:hidden sm:px-6 lg:px-8">
-        {navItems.map((item) => (
-          <Link key={`mobile-${item.href}`} href={item.href} className="whitespace-nowrap font-medium hover:text-white">
-            {item.label}
-          </Link>
-        ))}
-      </div>
+      {/* Mobile Menu Sheet */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-white/5 bg-[#030816] px-4 py-4">
+          <div className="flex flex-col space-y-4">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-base font-medium text-white"
+              >
+                {item.label}
+              </Link>
+            ))}
+            <div className="h-px bg-white/10 my-2" />
+            <Link
+              href="/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block text-base font-medium text-white"
+            >
+              Log in
+            </Link>
+            <Link
+              href="/signup"
+              onClick={() => setMobileMenuOpen(false)}
+              className="mt-2 block w-full rounded-lg bg-[#FF5C73] px-4 py-3 text-center font-bold tracking-wide text-white"
+            >
+              Start free
+            </Link>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

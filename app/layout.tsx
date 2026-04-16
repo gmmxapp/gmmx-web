@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import { Manrope, Space_Grotesk } from "next/font/google";
+import { Manrope, Space_Grotesk, Geist } from "next/font/google";
 import { Navbar } from "@/components/navbar";
-import { WhatsAppFloatButton } from "@/components/whatsapp-float-button";
 import { siteConfig, siteUrl } from "@/lib/site";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const bodyFont = Manrope({
   subsets: ["latin"],
@@ -18,21 +20,25 @@ const headingFont = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "GMMX | Gym Growth Operating System",
-    template: "%s | GMMX"
+    default: "GMMX | Next-Gen Gym Management System",
+    template: "%s | GMMX Gym Management"
   },
-  description: siteConfig.description,
+  description: "Gym Management System & OS. Advanced attendance, leads, WhatsApp CRM, and white-label tools for modern gyms.",
   keywords: [
     "gym software india",
     "gym management saas",
     "gym CRM",
     "fitness studio software",
-    "razorpay gym payments",
-    "white label gym website"
+    "gym management system"
   ],
+  icons: {
+    icon: "/logo-gmmx-gemini.png",
+    shortcut: "/logo-gmmx-gemini.png",
+    apple: "/logo-gmmx-gemini.png"
+  },
   openGraph: {
-    title: "GMMX | Gym Growth Operating System",
-    description: siteConfig.description,
+    title: "GMMX | Modern Gym Management System",
+    description: "Advanced attendance, leads, WhatsApp CRM, and white-label tools for modern gyms.",
     url: siteUrl,
     siteName: "GMMX",
     locale: "en_IN",
@@ -40,18 +46,17 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "GMMX | Gym Growth Operating System",
-    description: siteConfig.description
+    title: "GMMX | Next-Gen Gym Management System",
+    description: "Gym Growth Operating System for modern fitness businesses."
   }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${bodyFont.variable} ${headingFont.variable}`}>
+    <html lang="en" className={cn("dark", "font-sans", geist.variable)} suppressHydrationWarning>
+      <body className={`${bodyFont.variable} ${headingFont.variable} antialiased bg-[#05050A] text-white selection:bg-rose-500/30 selection:text-white`}>
         <Navbar />
         {children}
-        <WhatsAppFloatButton />
       </body>
     </html>
   );

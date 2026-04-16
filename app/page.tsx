@@ -69,12 +69,13 @@ const pricingPlans = [
 
 export default function HomePage() {
   return (
-    <main>
-      <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <HeroSection />
+    <main className="bg-[#05050A]">
+      <HeroSection />
+      
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <FeatureGrid />
 
-        <section className="mt-16 grid items-center gap-8 rounded-3xl border border-slate-200 bg-white/80 p-8 dark:border-slate-700 dark:bg-slate-900/70 lg:grid-cols-2">
+        <section className="mt-16 grid items-center gap-8 rounded-3xl border border-white/5 bg-white/5 p-8 dark:border-slate-700 dark:bg-slate-900/70 lg:grid-cols-2">
           <div>
             <p className="section-kicker">Mobile App Preview</p>
             <h2 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">Owner + trainer + member experience in your pocket</h2>
