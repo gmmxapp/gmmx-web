@@ -5,7 +5,9 @@ import { siteConfig, siteUrl } from "@/lib/site";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+import { SmoothScrollProvider } from "@/components/smooth-scroll";
+
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
 const bodyFont = Manrope({
   subsets: ["latin"],
@@ -33,8 +35,8 @@ export const metadata: Metadata = {
   ],
   icons: {
     icon: "/logo-gmmx-gemini.png",
-    shortcut: "/logo-gmmx-gemini.png",
-    apple: "/logo-gmmx-gemini.png"
+    shortcut: "/logo-trans.png",
+    apple: "/logo-trans.png"
   },
   openGraph: {
     title: "GMMX | Modern Gym Management System",
@@ -55,8 +57,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={cn("dark", "font-sans", geist.variable)} suppressHydrationWarning>
       <body className={`${bodyFont.variable} ${headingFont.variable} antialiased bg-[#05050A] text-white selection:bg-rose-500/30 selection:text-white`}>
-        <Navbar />
-        {children}
+        <SmoothScrollProvider>
+          <Navbar />
+          {children}
+        </SmoothScrollProvider>
       </body>
     </html>
   );

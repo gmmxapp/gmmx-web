@@ -1,50 +1,76 @@
 import Image from "next/image";
 import Link from "next/link";
+import RotatingText from "./rotating-text";
+import ShapeGrid from "./shape-grid";
+import StarBorder from "./star-border";
 
 export function HeroSection() {
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-white pt-32 pb-20 dark:bg-[#05050A] flex flex-col items-center justify-center transition-colors">
       
-      {/* CSS Animation specifically for the glowing grid */}
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes gridForward {
-          0% { background-position: 0 0; }
-          100% { background-position: 0 4rem; }
-        }
-        .animate-grid-flow {
-          animation: gridForward 2s linear infinite;
-        }
-      `}} />
-
-      {/* Animated Background Perspective Grid */}
-      <div className="absolute inset-x-0 bottom-0 h-[60vh] origin-bottom [transform:perspective(1000px)_rotateX(60deg)_scale(2)]">
-        <div className="absolute inset-x-0 bottom-0 h-full w-full opacity-60">
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:4rem_4rem] animate-grid-flow [mask-image:linear-gradient(to_bottom,transparent_10%,black_80%)]" />
-        </div>
+      {/* Dynamic ReactBits ShapeGrid Background */}
+      <div className="absolute inset-0 pointer-events-auto">
+        {/* We need pointer events auto on the wrapper so mouse interaction works for hovering */}
+        <ShapeGrid
+          shape="square"
+          squareSize={48}
+          direction="diagonal"
+          speed={0.5}
+          borderColor="rgba(255, 255, 255, 0.05)"
+          hoverFillColor="rgba(255, 92, 115, 0.15)"
+          hoverTrailAmount={5}
+        />
+        {/* Faded edges mask overlay so it isn't an abrupt square block mapping */}
+        <div className="absolute inset-0 bg-transparent [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black_100%)] pointer-events-none" />
       </div>
 
-      {/* Bottom Horizon Glow Behind Image */}
-      <div className="absolute bottom-0 left-1/2 w-[80vw] h-[350px] -translate-x-1/2 translate-y-1/3 bg-fuchsia-600/40 opacity-80 blur-[130px] pointer-events-none rounded-[100%]" />
+      {/* Deep Center Horizon Glow */}
+      <div className="absolute left-1/2 top-1/2 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#FF5C73]/5 opacity-60 blur-[130px] pointer-events-none" />
 
       {/* Main text content */}
-      <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center text-center px-4 sm:px-6">
-        
-        <h1 className="text-5xl font-bold leading-[1.1] tracking-tight text-white sm:text-6xl lg:text-[5.5rem]">
-          New Era of Gym OS
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center text-center px-4 sm:px-6">
+
+        <h1 className="flex flex-col sm:flex-row items-center justify-center gap-3 text-4xl font-extrabold leading-normal tracking-tighter text-white sm:text-5xl lg:text-[4rem] sm:gap-4">
+          <span className="whitespace-nowrap">Run Your Gym With</span>
+          <RotatingText
+            texts={[
+              "Autopilot",
+              "QR Check-ins",
+              "98% Retention",
+              "Microsites"
+            ]}
+            mainClassName="inline-flex justify-center items-center h-[65px] sm:h-[80px] lg:h-[95px] overflow-hidden rounded-2xl bg-[#FF5C73] px-5 sm:px-6 py-0 text-white shadow-[0_0_30px_rgba(255,92,115,0.4)] whitespace-nowrap min-w-min"
+            staggerFrom="first"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            staggerDuration={0.06}
+            splitLevelClassName="overflow-hidden pb-1 whitespace-nowrap flex"
+            transition={{ type: "tween", duration: 0.01 }}
+            rotationInterval={4500}
+          />
         </h1>
-        
-        <p className="mt-6 max-w-2xl text-lg font-medium leading-relaxed text-slate-300 sm:text-xl">
-          Automated WhatsApp reminders, rapid QR check-ins, scalable pipelines. 
-          Let our intelligent operating system do the heavy lifting for your fitness business.
+
+        <p className="mt-2 max-w-3xl text-lg font-medium leading-relaxed text-slate-600 dark:text-slate-300 sm:text-xl">
+          Automate QR check-ins, WhatsApp renewals, trainer workflows, member apps, and gym microsites — all from one powerful operating system.
         </p>
 
-        <div className="mt-10">
-          <Link
-            href="/signup"
-            className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 backdrop-blur-md px-6 py-3 text-sm font-semibold tracking-wide text-white transition-all hover:bg-white/10 hover:border-white/30 hover:scale-105"
+        <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
+          <StarBorder 
+            as={Link} 
+            href="/signup" 
+            color="white" 
+            speed="4s"
+            className="hover:scale-105 transition-transform"
           >
-            Start Free Trial for 14 days
-          </Link>
+            Start 14-Day Free Trial
+          </StarBorder>
+          <a
+            href="#demo"
+            className="inline-flex items-center justify-center rounded-[20px] border border-slate-200 bg-white px-10 py-5 text-[16px] font-bold tracking-wide text-slate-800 transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+          >
+            <span className="mr-2 text-lg">▶</span> Watch Demo
+          </a>
         </div>
       </div>
 
@@ -63,7 +89,7 @@ export function HeroSection() {
             />
           </div>
         </div>
-        
+
         {/* Bottom solid glow anchor mimicking the Wope base border */}
         <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-fuchsia-400 to-transparent opacity-60" />
       </div>
