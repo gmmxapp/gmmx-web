@@ -2,12 +2,7 @@
 
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
  
-type Transition = Record<string, unknown> | undefined;
-type VariantLabels = string | string[];
-type Target = Record<string, unknown>;
-type TargetAndTransition = Record<string, unknown>;
-
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, type Target, type VariantLabels, type TargetAndTransition, type Transition } from 'motion/react';
 
 function cn(...classes: (string | undefined | null | boolean)[]): string {
   return classes.filter(Boolean).join(' ');
