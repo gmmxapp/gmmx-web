@@ -82,30 +82,33 @@ export function PricingSection() {
   };
 
   return (
-    <section id="pricing" className="mt-24 scroll-mt-24 py-20 bg-[#05050A]">
+    <section id="pricing" className="scroll-mt-24">
       <div className="container mx-auto px-4 max-w-7xl">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">Pricing Plans</h2>
-          <p className="text-xl text-slate-400">Choose the plan that's right for you</p>
+        <div className="text-center mb-16">
+          <p className="text-[#FF5C73] font-bold tracking-widest text-sm uppercase mb-4">
+            Simple Pricing
+          </p>
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">Pricing Plans</h2>
+          <p className="text-xl text-slate-400">Choose the plan that's right for your gym's growth</p>
           
-          <div className="mt-8 flex justify-center">
+          <div className="mt-10 flex justify-center">
             <Tabs 
               defaultValue="monthly" 
               onValueChange={(val) => setBillingPeriod(val as "monthly" | "yearly")}
-              className="bg-white/5 p-1 rounded-xl border border-white/10"
+              className="bg-white/5 p-1.5 rounded-2xl border border-white/10 backdrop-blur-md shadow-xl"
             >
-              <TabsList className="bg-transparent border-none p-0 h-10">
+              <TabsList className="bg-transparent border-none p-0 h-12">
                 <TabsTrigger 
                   value="monthly" 
-                  className="rounded-lg px-6 data-[state=active]:bg-white data-[state=active]:text-black text-white transition-all font-bold"
+                  className="rounded-xl px-8 data-[state=active]:bg-white data-[state=active]:text-black text-slate-400 transition-all font-bold text-sm md:text-base"
                 >
                   Monthly
                 </TabsTrigger>
                 <TabsTrigger 
                   value="yearly" 
-                  className="rounded-lg px-6 data-[state=active]:bg-white data-[state=active]:text-black text-white transition-all font-bold"
+                  className="rounded-xl px-8 data-[state=active]:bg-white data-[state=active]:text-black text-slate-400 transition-all font-bold text-sm md:text-base"
                 >
-                  Yearly
+                  Yearly <span className="ml-2 rounded-full bg-[#FF5C73]/20 text-[#FF5C73] px-2 py-0.5 text-[10px] uppercase hidden sm:inline-block">Save 20%</span>
                 </TabsTrigger>
               </TabsList>
             </Tabs>

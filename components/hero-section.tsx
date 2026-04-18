@@ -6,22 +6,26 @@ import StarBorder from "./star-border";
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-white pt-32 pb-20 dark:bg-[#05050A] flex flex-col items-center justify-center transition-colors">
+    <section className="relative min-h-screen w-full overflow-hidden bg-transparent pt-32 pb-20 flex flex-col items-center justify-center">
       
       {/* Dynamic ReactBits ShapeGrid Background */}
-      <div className="absolute inset-0 pointer-events-auto">
+      <div 
+        className="absolute inset-0 pointer-events-auto"
+        style={{
+          maskImage: "radial-gradient(ellipse at center, black 40%, transparent 100%)",
+          WebkitMaskImage: "radial-gradient(ellipse at center, black 40%, transparent 100%)"
+        }}
+      >
         {/* We need pointer events auto on the wrapper so mouse interaction works for hovering */}
         <ShapeGrid
           shape="square"
           squareSize={48}
           direction="diagonal"
           speed={0.5}
-          borderColor="rgba(255, 255, 255, 0.05)"
+          borderColor="rgba(150, 150, 150, 0.15)"
           hoverFillColor="rgba(255, 92, 115, 0.15)"
           hoverTrailAmount={5}
         />
-        {/* Faded edges mask overlay so it isn't an abrupt square block mapping */}
-        <div className="absolute inset-0 bg-transparent [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black_100%)] pointer-events-none" />
       </div>
 
       {/* Deep Center Horizon Glow */}
@@ -30,7 +34,7 @@ export function HeroSection() {
       {/* Main text content */}
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center text-center px-4 sm:px-6">
 
-        <h1 className="flex flex-col sm:flex-row items-center justify-center gap-3 text-4xl font-extrabold leading-normal tracking-tighter text-white sm:text-5xl lg:text-[4rem] sm:gap-4">
+        <h1 className="flex flex-col sm:flex-row items-center justify-center gap-3 text-3xl font-extrabold leading-normal tracking-tighter text-slate-900 dark:text-white sm:text-5xl lg:text-[4rem] sm:gap-4">
           <span className="whitespace-nowrap">Run Your Gym With</span>
           <RotatingText
             texts={[
@@ -39,7 +43,7 @@ export function HeroSection() {
               "98% Retention",
               "Microsites"
             ]}
-            mainClassName="inline-flex justify-center items-center h-[65px] sm:h-[80px] lg:h-[95px] overflow-hidden rounded-2xl bg-[#FF5C73] px-5 sm:px-6 py-0 text-white shadow-[0_0_30px_rgba(255,92,115,0.4)] whitespace-nowrap min-w-min"
+            mainClassName="inline-flex justify-center items-center h-[60px] sm:h-[80px] lg:h-[95px] overflow-hidden rounded-2xl bg-[#FF5C73] px-4 sm:px-6 py-0 text-white shadow-[0_0_30px_rgba(255,92,115,0.4)] whitespace-nowrap"
             staggerFrom="first"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

@@ -14,17 +14,16 @@ const cardBaseStyle: CSSProperties = {
   willChange: "transform",
   backfaceVisibility: "hidden",
   transformStyle: "preserve-3d",
-  boxShadow: "0 0 30px rgba(0,0,0,0.1)",
-  height: "20rem",
+  boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
+
   width: "100%",
   maxWidth: "1100px",
   margin: "0 auto",
-  padding: "3rem",
-  borderRadius: "40px",
+  borderRadius: "32px",
   boxSizing: "border-box",
 
   position: "sticky",
-  top: "120px",
+  top: "100px",
 
   transform: "translateZ(0)"
 };
@@ -142,7 +141,10 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
     updateCardTransforms();
 
     const handleScroll = () => updateCardTransforms();
-    const handleResize = () => updateCardOffsets();
+    const handleResize = () => {
+      updateCardOffsets();
+      updateCardTransforms();
+    };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleResize);
@@ -157,10 +159,11 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
     <div className={className}>
       <div
         style={{
-          padding: "10vh 0 60vh", 
+          padding: "10vh 0 60vh",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center"
+          alignItems: "center",
+          gap: "2rem"
         }}
       >
         {children}

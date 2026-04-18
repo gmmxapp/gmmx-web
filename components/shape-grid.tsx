@@ -209,20 +209,6 @@ const ShapeGrid: React.FC<ShapeGridProps> = ({
         }
       }
 
-      const gradient = ctx.createRadialGradient(
-        canvas.width / 2,
-        canvas.height / 2,
-        0,
-        canvas.width / 2,
-        canvas.height / 2,
-        Math.sqrt(canvas.width ** 2 + canvas.height ** 2) / 2
-      );
-      // Subtle background mapping
-      gradient.addColorStop(0, 'rgba(5, 5, 10, 0)');
-      gradient.addColorStop(1, '#05050A');
-
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
     };
 
     const updateAnimation = () => {

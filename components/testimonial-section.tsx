@@ -33,7 +33,7 @@ const testimonials = [
 
 export function TestimonialSection() {
   return (
-    <section id="clients" className="mt-32 scroll-mt-24 py-16 bg-[#05050A]">
+    <section id="clients" className="scroll-mt-24 bg-[#05050A]">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
           <p className="text-[#FF5C73] font-bold tracking-widest text-xs uppercase mb-1 underline underline-offset-4 decoration-2">Testimonials</p>
