@@ -8,44 +8,52 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getWhatsAppLink } from "@/lib/site";
 import Link from "next/link";
 
+import { useCart } from "@/lib/cart-context";
+import { toast } from "sonner";
+
 const pricingPlans = [
   {
+    id: "plan-free",
     name: "Always Free",
-    price: { monthly: "₹0", yearly: "₹0" },
+    price: { monthly: 0, yearly: 0 },
+    displayPrice: { monthly: "₹0", yearly: "₹0" },
     note: "Forever",
     description: "Best for trying GMMX with core attendance and lead capture.",
     features: ["Basic attendance (10 members)", "Lead entries", "WhatsApp support"],
-    ctaLabel: "Start free",
-    ctaHref: "/signup",
+    ctaLabel: "Add to Cart",
     popular: false
   },
   {
+    id: "plan-growth",
     name: "Growth",
-    price: { monthly: "₹799", yearly: "₹639" },
+    price: { monthly: 799, yearly: 639 },
+    displayPrice: { monthly: "₹799", yearly: "₹639" },
     note: "per month",
     description: "Perfect for small gyms that need reminders, CRM, and reporting.",
     features: ["QR attendance (100 members)", "Fee reminders", "Gym analytics", "WhatsApp reminders"],
-    ctaLabel: "Choose Growth",
-    ctaHref: "/signup",
+    ctaLabel: "Add to Cart",
     popular: true
   },
   {
+    id: "plan-scale",
     name: "Scale",
-    price: { monthly: "₹1299", yearly: "₹1039" },
+    price: { monthly: 1299, yearly: 1039 },
+    displayPrice: { monthly: "₹1299", yearly: "₹1039" },
     note: "per month",
     description: "For ambitious gyms scaling trainers, operations, and multi-role workflows.",
     features: ["Unlimited members", "Trainer tasking", "Advanced automation", "White-label microsite"],
-    ctaLabel: "Choose Scale",
-    ctaHref: "/signup",
+    ctaLabel: "Add to Cart",
     popular: false
   },
   {
+    id: "plan-enterprise",
     name: "Enterprise",
-    price: { monthly: "Custom", yearly: "Custom" },
+    price: { monthly: 0, yearly: 0 },
+    displayPrice: { monthly: "Custom", yearly: "Custom" },
     note: "Tailored",
     description: "Built for multi-branch operators with onboarding and migration support.",
     features: ["Custom onboarding", "Priority support", "Enterprise controls", "Dedicated account manager"],
-    ctaLabel: "Talk to GMMX",
+    ctaLabel: "Contact Sales",
     ctaHref: getWhatsAppLink("Hi GMMX team, I want Enterprise pricing details."),
     popular: false
   }
@@ -53,6 +61,25 @@ const pricingPlans = [
 
 export function PricingSection() {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
+  const { addItem, items } = useCart();
+
+  const handleAddToCart = (plan: typeof pricingPlans[0]) => {
+    if (plan.id === "plan-enterprise") {
+      window.open(plan.ctaHref, "_blank");
+      return;
+    }
+
+    const price = billingPeriod === "monthly" ? plan.displayPrice.monthly : plan.displayPrice.yearly;
+    
+    addItem({
+      id: plan.id,
+      name: `${plan.name} (${billingPeriod === "monthly" ? "Monthly" : "Yearly"})`,
+      price: price,
+      type: "plan"
+    });
+
+    toast.success(`${plan.name} added to cart!`);
+  };
 
   return (
     <section id="pricing" className="scroll-mt-24">
@@ -88,82 +115,66 @@ export function PricingSection() {
           </div>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
-          {pricingPlans.map((plan) => (
-            <Card 
-              key={plan.name}
-              className={`relative overflow-visible flex flex-col rounded-[2rem] p-2 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl ${
-                plan.popular 
-                  ? "bg-gradient-to-b from-[#FF5C73]/20 to-black/40 border-[#FF5C73]/50 shadow-[0_0_40px_rgba(255,92,115,0.15)] ring-1 ring-[#FF5C73]/50" 
-                  : "bg-white/5 backdrop-blur-xl border-white/10 hover:border-white/20"
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#FF5C73] to-[#ff3b57] px-6 py-1.5 text-xs font-black uppercase tracking-widest text-white shadow-lg ring-4 ring-[#05050A]">
-                  Recommended
-                </div>
-              )}
-
-              <CardHeader className="pt-8 px-6">
-                <CardTitle className="text-xl font-bold text-white mb-2">{plan.name}</CardTitle>
-                <div className="flex items-end gap-1 mt-2">
-                  <span className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-                    {billingPeriod === "monthly" ? plan.price.monthly : plan.price.yearly}
-                  </span>
-                  {plan.price.monthly !== "Custom" && (
-                    <span className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                      /{billingPeriod === "monthly" ? "mo" : "mo"}
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          {pricingPlans.map((plan) => {
+            const isInCart = items.some(i => i.id === plan.id && i.name.includes(billingPeriod === "monthly" ? "Monthly" : "Yearly"));
+            
+            return (
+              <Card 
+                key={plan.name}
+                className={`relative flex flex-col bg-black/40 border-white/5 rounded-[2.5rem] p-4 transition-all hover:border-[#FF5C73]/30 ${
+                  plan.popular ? "border-[#FF5C73] ring-1 ring-[#FF5C73] shadow-[0_0_40px_rgba(255,92,115,0.15)]" : ""
+                }`}
+              >
+                <CardHeader className="pt-8 px-6">
+                  <CardTitle className="text-xl font-bold text-white mb-2">{plan.name}</CardTitle>
+                  <div className="flex items-baseline gap-1 mt-2">
+                    <span className="text-4xl font-black text-white">
+                      {billingPeriod === "monthly" ? plan.displayPrice.monthly : plan.displayPrice.yearly}
                     </span>
-                  )}
-                </div>
-                <CardDescription className="mt-4 text-slate-400 font-medium leading-relaxed min-h-[60px]">
-                  {plan.description}
-                </CardDescription>
-              </CardHeader>
+                    <span className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+                      /{billingPeriod === "monthly" ? "month" : "month"}
+                    </span>
+                  </div>
+                  <CardDescription className="mt-4 text-slate-400 font-medium leading-relaxed">
+                    {plan.description}
+                  </CardDescription>
+                </CardHeader>
 
-              <CardContent className="flex-1 px-6 pt-6">
-                <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent mb-6" />
-                <ul className="space-y-4">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3">
-                      <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10">
-                        <Check className="h-3 w-3 text-emerald-400 stroke-[3px]" />
-                      </div>
-                      <span className="text-sm text-slate-300 font-medium leading-tight">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
+                <CardContent className="flex-1 px-6 pt-6">
+                  <ul className="space-y-4">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-3">
+                        <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10">
+                          <Check className="h-3 w-3 text-emerald-400 stroke-[3px]" />
+                        </div>
+                        <span className="text-sm text-slate-300 font-medium leading-tight">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
 
-              <CardFooter className="px-6 pb-8 pt-8">
-                {plan.ctaHref.startsWith("http") ? (
-                  <a
-                    href={plan.ctaHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`w-full flex items-center justify-center rounded-xl px-6 py-4 text-sm font-black transition-all ${
-                      plan.popular
-                        ? "bg-[#FF5C73] text-white hover:opacity-90 hover:shadow-[0_0_20px_rgba(255,92,115,0.4)]"
-                        : "bg-white text-black hover:bg-slate-200"
+                <CardFooter className="px-6 pb-8 pt-8">
+                  <button
+                    onClick={() => handleAddToCart(plan)}
+                    className={`w-full flex items-center justify-center rounded-2xl px-6 py-4 text-sm font-black transition-all ${
+                      isInCart 
+                      ? "bg-emerald-500 text-white" 
+                      : "bg-white text-black hover:bg-slate-200"
                     }`}
                   >
-                    {plan.ctaLabel}
-                  </a>
-                ) : (
-                  <Link
-                    href={plan.ctaHref}
-                    className={`w-full flex items-center justify-center rounded-xl px-6 py-4 text-sm font-black transition-all ${
-                      plan.popular
-                        ? "bg-[#FF5C73] text-white hover:opacity-90 hover:shadow-[0_0_20px_rgba(255,92,115,0.4)]"
-                        : "bg-white text-black hover:bg-slate-200"
-                    }`}
-                  >
-                    {plan.ctaLabel}
-                  </Link>
+                    {isInCart ? "In Cart" : plan.ctaLabel}
+                  </button>
+                </CardFooter>
+
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#FF5C73] px-4 py-1 text-[10px] font-black uppercase tracking-widest text-white ring-4 ring-black">
+                    Recommended
+                  </div>
                 )}
-              </CardFooter>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       </div>
     </section>

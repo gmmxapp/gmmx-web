@@ -1,6 +1,5 @@
 "use client";
 
-import type { SpringOptions } from 'motion/react';
 import { useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'motion/react';
 
@@ -20,7 +19,7 @@ interface TiltedCardProps {
   displayOverlayContent?: boolean;
 }
 
-const springValues: SpringOptions = {
+const springValues = {
   damping: 30,
   stiffness: 100,
   mass: 2
@@ -116,7 +115,7 @@ export default function TiltedCard({
           rotateX,
           rotateY,
           scale
-        }}
+        } as never}
       >
         <motion.img
           src={imageSrc}
@@ -143,7 +142,7 @@ export default function TiltedCard({
             y,
             opacity,
             rotate: rotateFigcaption
-          }}
+          } as never}
         >
           {captionText}
         </motion.figcaption>

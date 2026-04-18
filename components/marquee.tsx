@@ -22,7 +22,7 @@ export function Marquee({ children, baseVelocity = 100, className = "" }: Marque
     clamp: false
   });
 
-  const x = useTransform(baseX, (v) => `${wrap(-20, -45, v)}%`);
+  const x = useTransform(baseX, (v) => `${wrap(-20, -45, v as number)}%`);
 
   const directionFactor = useRef<number>(1);
   useAnimationFrame((t, delta) => {
@@ -41,7 +41,7 @@ export function Marquee({ children, baseVelocity = 100, className = "" }: Marque
 
   return (
     <div className={`overflow-hidden whitespace-nowrap flex flex-nowrap ${className}`}>
-      <motion.div className="flex whitespace-nowrap flex-nowrap gap-10" style={{ x }}>
+      <motion.div className="flex whitespace-nowrap flex-nowrap gap-10" style={{ x } as never}>
         <span>{children} </span>
         <span>{children} </span>
         <span>{children} </span>

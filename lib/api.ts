@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 
 type ApiErrorBody = {
   error?: string;
@@ -66,11 +66,19 @@ export type CreateUserResponse = {
   role: string;
 };
 
-export function registerOwner(payload: RegisterOwnerPayload) {
-  return apiFetch<RegisterOwnerResponse>("/api/auth/owner/register", {
+export async function registerOwner(payload: RegisterOwnerPayload) {
+  const response = await fetch("/api/auth/owner/register", {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
+
+  if (!response.ok) {
+     const data = await response.json().catch(() => ({}));
+     throw new Error(data.message || data.error || "Registration failed");
+  }
+
+  return response.json() as Promise<RegisterOwnerResponse>;
 }
 
 export function fetchPublicGymProfile(slug: string) {

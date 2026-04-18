@@ -1,5 +1,12 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import {
+  getAuth,
+  initializeAuth,
+  browserLocalPersistence,
+  browserPopupRedirectResolver,
+  indexedDBLocalPersistence,
+} from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,15 +20,39 @@ const firebaseConfig = {
 // Initialize Firebase only if not already initialized
 export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-let authInstance = null;
+let authInstance: ReturnType<typeof getAuth> | null = null;
 try {
-  // Only attempt to initialize auth if API key is present, preventing dev crashes
   if (firebaseConfig.apiKey) {
-    authInstance = getAuth(app);
+    // Use initializeAuth with explicit persistence so reCAPTCHA Enterprise
+    // doesn't attempt a lazy init that fails silently in the console.
+    authInstance = getApps().length > 1
+      ? getAuth(app) // already initialized by a previous initializeAuth call
+      : initializeAuth(app, {
+          persistence: [indexedDBLocalPersistence, browserLocalPersistence],
+          popupRedirectResolver: browserPopupRedirectResolver,
+        });
     authInstance.useDeviceLanguage();
   }
 } catch (e) {
-  console.warn("Firebase Auth could not be initialized. Missing or invalid config.", e);
+  // Falls back to getAuth if initializeAuth was already called
+  try {
+    if (firebaseConfig.apiKey) {
+      authInstance = getAuth(app);
+      authInstance.useDeviceLanguage();
+    }
+  } catch (e2) {
+    console.warn("Firebase Auth could not be initialized.", e2);
+  }
 }
 
 export const auth = authInstance;
+
+// Firestore instance — safe to export even if app isn't fully configured
+export let db: ReturnType<typeof getFirestore> | null = null;
+try {
+  if (firebaseConfig.apiKey) {
+    db = getFirestore(app);
+  }
+} catch (e) {
+  console.warn("Firestore could not be initialized.", e);
+}
