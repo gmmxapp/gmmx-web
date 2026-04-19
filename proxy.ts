@@ -16,7 +16,7 @@ function getSlugFromHost(host: string): string | null {
   return null;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (

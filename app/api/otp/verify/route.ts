@@ -1,41 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 
-declare global {
-  var otpStore: Map<string, { otp: string; expiresAt: number }>;
-}
-
-const otpStore = global.otpStore || (global.otpStore = new Map());
-
 export async function POST(req: NextRequest) {
+  const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  const body = await req.json();
+
   try {
-    const { email, mobile, identifier, otp } = await req.json();
-    const id = identifier || email || mobile;
+    const response = await fetch(`${BACKEND_URL}/api/auth/verify-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        email: body.email || body.identifier, 
+        code: body.otp 
+      }),
+    });
 
-    if (!id || !otp) {
-      return NextResponse.json({ error: "Identifier (Email/Mobile) and OTP are required" }, { status: 400 });
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        return NextResponse.json(data, { status: response.status });
     }
-
-    const searchKey = id.toLowerCase().replace(/\s+/g, '');
-    const record = otpStore.get(searchKey);
-
-    if (!record) {
-      return NextResponse.json({ error: "No OTP found for this identifier" }, { status: 400 });
-    }
-
-    if (Date.now() > record.expiresAt) {
-      otpStore.delete(searchKey);
-      return NextResponse.json({ error: "OTP has expired" }, { status: 400 });
-    }
-
-    if (record.otp !== otp) {
-      return NextResponse.json({ error: "Invalid OTP" }, { status: 400 });
-    }
-
-    // Success! Clear the OTP
-    otpStore.delete(searchKey);
 
     return NextResponse.json({ success: true, message: "Verification successful" });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Verification failed" }, { status: 500 });
+  } catch (err: any) {
+    console.error(`[OTP-VERIFY-PROXY] Backend connection failed: ${err.message}`);
+    return NextResponse.json({ error: "Backend server unreachable" }, { status: 503 });
   }
 }

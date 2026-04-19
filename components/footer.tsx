@@ -95,6 +95,7 @@ export function Footer() {
                   src="/logo-trans.png"
                   alt="GMMX logo"
                   fill
+                  sizes="56px"
                   className="object-contain p-2"
                 />
               </div>

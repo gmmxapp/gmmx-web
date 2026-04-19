@@ -6,7 +6,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 
 import { SmoothScrollProvider } from "@/components/smooth-scroll";
-import { CartProvider } from "@/lib/cart-context";
+
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -54,21 +54,17 @@ export const metadata: Metadata = {
   }
 };
 
-import { CartDrawer } from "@/components/cart-drawer";
 import { Toaster } from "sonner";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={cn("dark", "font-sans", geist.variable)} suppressHydrationWarning>
       <body className={`${bodyFont.variable} ${headingFont.variable} antialiased bg-[#05050A] text-white selection:bg-rose-500/30 selection:text-white`}>
-        <CartProvider>
           <SmoothScrollProvider>
             <Navbar />
             {children}
-            <CartDrawer />
             <Toaster position="top-center" expand={true} richColors closeButton theme="dark" />
           </SmoothScrollProvider>
-        </CartProvider>
       </body>
     </html>
   );

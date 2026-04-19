@@ -33,6 +33,7 @@ export type RegisterOwnerPayload = {
   location: string;
   slug: string;
   password: string;
+  hasMicrosite: boolean;
 };
 
 export type RegisterOwnerResponse = {
@@ -49,6 +50,7 @@ export type PublicGymProfile = {
   about: string;
   contactPhone: string;
   themePrimary: string;
+  hasMicrosite: boolean;
 };
 
 export type CreateUserPayload = {
