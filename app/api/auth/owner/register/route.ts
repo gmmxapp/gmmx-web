@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.gmmx.app";
 
   console.log(`[PROXY] Attempting registration for ${body.email} at ${BACKEND_URL}`);
 

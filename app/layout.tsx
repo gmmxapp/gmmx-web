@@ -23,8 +23,8 @@ const headingFont = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "GMMX | Next-Gen Gym Management System",
-    template: "%s | GMMX Gym Management"
+    default: "Gmmx - Gym Management System",
+    template: "%s | Gmmx - Gym Management"
   },
   description: "Gym Management System & OS. Advanced attendance, leads, WhatsApp CRM, and white-label tools for modern gyms.",
   keywords: [
@@ -40,16 +40,16 @@ export const metadata: Metadata = {
     apple: "/logo-trans.png"
   },
   openGraph: {
-    title: "GMMX | Modern Gym Management System",
+    title: "Gmmx - Modern Gym Management System",
     description: "Advanced attendance, leads, WhatsApp CRM, and white-label tools for modern gyms.",
     url: siteUrl,
-    siteName: "GMMX",
+    siteName: "Gmmx",
     locale: "en_IN",
     type: "website"
   },
   twitter: {
     card: "summary_large_image",
-    title: "GMMX | Next-Gen Gym Management System",
+    title: "Gmmx - Modern Gym Management System",
     description: "Gym Growth Operating System for modern fitness businesses."
   }
 };
@@ -60,11 +60,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={cn("dark", "font-sans", geist.variable)} suppressHydrationWarning>
       <body className={`${bodyFont.variable} ${headingFont.variable} antialiased bg-[#05050A] text-white selection:bg-rose-500/30 selection:text-white`}>
-          <SmoothScrollProvider>
-            <Navbar />
-            {children}
-            <Toaster position="top-center" expand={true} richColors closeButton theme="dark" />
-          </SmoothScrollProvider>
+        <SmoothScrollProvider>
+          <Navbar />
+          {children}
+          <Toaster position="top-center" expand={true} richColors closeButton theme="dark" />
+        </SmoothScrollProvider>
       </body>
     </html>
   );
