@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api.gmmx.app";
 
 type ApiErrorBody = {
   error?: string;
@@ -32,7 +32,7 @@ export type RegisterOwnerPayload = {
   gymName: string;
   location: string;
   slug: string;
-  password: string;
+  pin: string;
   hasMicrosite: boolean;
 };
 

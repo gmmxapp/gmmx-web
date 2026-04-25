@@ -7,8 +7,10 @@ import { useState } from "react";
 const navItems = [
   { href: "/#features", label: "Features" },
   { href: "/makesite", label: "Microsites" },
-  { href: "/#clients", label: "Testimonials" },
-  { href: "/#pricing", label: "Pricing" }
+  { href: "/pricing", label: "Pricing" },
+  { href: "/blog", label: "Blog" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" }
 ];
 
 export function Navbar() {

@@ -7,10 +7,19 @@ export async function POST(req: NextRequest) {
   console.log(`[PROXY] Attempting registration for ${body.email} at ${BACKEND_URL}`);
 
   try {
-    const response = await fetch(`${BACKEND_URL}/api/auth/owner/register`, {
+    const backendPayload = {
+      gymName: body.gymName,
+      subdomain: body.slug,
+      ownerName: body.ownerName,
+      email: body.email,
+      phone: body.mobile,
+      pin: body.pin
+    };
+
+    const response = await fetch(`${BACKEND_URL}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify(backendPayload),
     });
 
     const data = await response.json();

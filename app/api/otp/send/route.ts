@@ -4,14 +4,14 @@ export async function POST(req: NextRequest) {
   const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
   const body = await req.json();
 
-  try {
-    const response = await fetch(`${BACKEND_URL}/api/auth/send-otp`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: body.email }),
-    });
-
-    const data = await response.json();
+    try {
+      const response = await fetch(`${BACKEND_URL}/auth/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: body.email || body.phone || body.identifier }),
+      });
+  
+      const data = await response.json();
     if (!response.ok) {
       return NextResponse.json(data, { status: response.status });
     }

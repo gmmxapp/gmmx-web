@@ -121,18 +121,19 @@ export function Footer() {
               <ul className="mt-6 space-y-4 text-sm text-slate-400">
                 <li><Link href="/#features" className="transition-colors hover:text-[#FF5C73]">Features</Link></li>
                 <li><Link href="/makesite" className="transition-colors hover:text-[#FF5C73]">Microsites</Link></li>
-                <li><Link href="/#pricing" className="transition-colors hover:text-[#FF5C73]">Pricing</Link></li>
-                <li><Link href="#" className="transition-colors hover:text-[#FF5C73]">Autopilot</Link></li>
+                <li><Link href="/pricing" className="transition-colors hover:text-[#FF5C73]">Pricing</Link></li>
+                <li><Link href="/#faq" className="transition-colors hover:text-[#FF5C73]">FAQs</Link></li>
               </ul>
             </div>
 
             {/* Resources */}
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-widest text-white">Resources</h3>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-white">Company</h3>
               <ul className="mt-6 space-y-4 text-sm text-slate-400">
-                <li><Link href="#" className="transition-colors hover:text-[#FF5C73]">Help Center</Link></li>
+                <li><Link href="/about" className="transition-colors hover:text-[#FF5C73]">About Us</Link></li>
+                <li><Link href="/blog" className="transition-colors hover:text-[#FF5C73]">Blog</Link></li>
+                <li><Link href="/contact" className="transition-colors hover:text-[#FF5C73]">Contact</Link></li>
                 <li><Link href="#" className="transition-colors hover:text-[#FF5C73]">Success Stories</Link></li>
-                <li><Link href="#" className="transition-colors hover:text-[#FF5C73]">Blog</Link></li>
               </ul>
             </div>
 

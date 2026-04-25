@@ -4,15 +4,15 @@ export async function POST(req: NextRequest) {
   const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
   const body = await req.json();
 
-  try {
-    const response = await fetch(`${BACKEND_URL}/api/auth/verify-otp`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        email: body.email || body.identifier, 
-        code: body.otp 
-      }),
-    });
+    try {
+      const response = await fetch(`${BACKEND_URL}/auth/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          identifier: body.email || body.identifier || body.phone, 
+          otp: body.otp 
+        }),
+      });
 
     if (!response.ok) {
         const data = await response.json().catch(() => ({}));

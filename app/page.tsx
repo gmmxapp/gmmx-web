@@ -4,7 +4,6 @@ import { FeatureGrid } from "@/components/feature-grid";
 import { Footer } from "@/components/footer";
 import { HeroSection } from "@/components/hero-section";
 import { MobileAppSection } from "../components/mobile-app-section";
-import { PricingSection } from "@/components/pricing-section";
 import { TestimonialSection } from "@/components/testimonial-section";
 import { getWhatsAppLink, siteConfig, siteUrl } from "@/lib/site";
 
@@ -39,11 +38,11 @@ export default function HomePage() {
 
         <MobileAppSection />
 
-        <PricingSection />
-
         <TestimonialSection />
         
-        <FAQAccordion />
+        <section id="faq">
+          <FAQAccordion />
+        </section>
       </div>
       <Footer />
 

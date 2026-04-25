@@ -20,6 +20,12 @@ import {
   Globe,
   CreditCard,
   Sparkles,
+  Smartphone,
+  Zap,
+  Crown,
+  Rocket,
+  AlertCircle,
+  ShieldAlert,
 } from "lucide-react";
 import { registerOwner } from "@/lib/api";
 import StarBorder from "@/components/star-border";
@@ -114,12 +120,14 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
 
   // ── Step 1 state ──────────────────────────────────────────────────────────
-  const [user, setUser] = useState({ ownerName: "", email: "", mobile: "", password: "" });
+  const [user, setUser] = useState({ ownerName: "", email: "", mobile: "", pin: "" });
   const [otpSent,    setOtpSent]    = useState(false);
   const [otp,        setOtp]        = useState("");
   const [sending,    setSending]    = useState(false);
   const [verifying,  setVerifying]  = useState(false);
   const [verified,   setVerified]   = useState(false);
+  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
+  const [checkingEmail, setCheckingEmail] = useState(false);
 
   // ── Step 2 state ──────────────────────────────────────────────────────────
   const [site, setSite] = useState({ gymName: "", username: "", location: "", theme: "dark-forge", wantMicrosite: true });
@@ -138,6 +146,21 @@ export default function SignupPage() {
     const slug = site.gymName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     setSite(p => ({ ...p, username: slug }));
   }, [site.gymName, usernameEdited]);
+
+  // Debounced email availability check
+  useEffect(() => {
+    if (!user.email || !user.email.includes("@")) { setEmailAvailable(null); return; }
+    const t = setTimeout(async () => {
+      setCheckingEmail(true);
+      try {
+        const r = await fetch(`/api/auth/check-email?email=${encodeURIComponent(user.email)}`);
+        const d = await r.json();
+        setEmailAvailable(d.available);
+      } catch { setEmailAvailable(null); }
+      finally { setCheckingEmail(false); }
+    }, 800);
+    return () => clearTimeout(t);
+  }, [user.email]);
 
   // Debounced slug availability check
   useEffect(() => {
@@ -203,13 +226,14 @@ export default function SignupPage() {
 
   // ── OTP send ──────────────────────────────────────────────────────────────
   const sendOtp = async () => {
-    if (!user.email || !user.mobile) { setError("Fill email and mobile first"); return; }
+    if (!user.email) { setError("Please enter your email address first"); return; }
+    if (emailAvailable === false) { setError("This email is already registered. Please login instead."); return; }
     setSending(true); setError(null);
     try {
       const r = await fetch("/api/otp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user.email, mobile: user.mobile.replace(/\D/g, '').slice(-10), gymName: "Verification" }),
+        body: JSON.stringify({ identifier: user.email }),
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || "Failed to send OTP");
@@ -226,7 +250,7 @@ export default function SignupPage() {
       const r = await fetch("/api/otp/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user.email, mobile: user.mobile.replace(/\D/g, '').slice(-10), otp }),
+        body: JSON.stringify({ identifier: user.email, otp }),
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || "Invalid OTP");
@@ -238,7 +262,7 @@ export default function SignupPage() {
   // ── Step 1 → 2 ────────────────────────────────────────────────────────────
   const goToStep2 = () => {
     if (!verified) { setError("Verify your identity first"); return; }
-    if (!user.ownerName || !user.password || !user.email || !user.mobile) { 
+    if (!user.ownerName || !user.pin || !user.email || !user.mobile) { 
       setError("Please fill in all your details"); 
       return; 
     }
@@ -299,7 +323,7 @@ export default function SignupPage() {
         ownerName: user.ownerName,
         email: user.email,
         mobile: user.mobile.replace(/\D/g, '').slice(-10),
-        password: user.password,
+        pin: user.pin,
         gymName: site.gymName,
         location: site.location,
         slug: site.username,
@@ -355,47 +379,76 @@ export default function SignupPage() {
                       placeholder="The Rock" className={inputCls} />
                   </Field>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Field label="Email" icon={Mail}>
-                      <input required type="email" name="email" value={user.email} onChange={handleUserChange}
-                        disabled={verified} placeholder="you@gmmx.app"
-                        className={inputCls + (verified ? " opacity-60 cursor-not-allowed" : "")} />
+                  <div className="space-y-4">
+                    <Field label="Business Email" icon={Mail}>
+                      <div className="relative group">
+                        <input required type="email" name="email" value={user.email} onChange={handleUserChange}
+                          disabled={verified} placeholder="e.g., owner@titanfitness.com"
+                          className={inputCls + (verified ? " opacity-60 cursor-not-allowed" : "") + (emailAvailable === false ? " border-rose-500/50 pr-12" : "")} />
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                          {checkingEmail && <Loader2 className="animate-spin text-slate-500" size={16} />}
+                          {!checkingEmail && emailAvailable === false && <ShieldAlert className="text-rose-500 animate-pulse" size={16} />}
+                          {!checkingEmail && emailAvailable === true && <CheckCircle2 className="text-emerald-500" size={16} />}
+                        </div>
+                      </div>
+                      {emailAvailable === false && <p className="text-[10px] text-rose-400 mt-1 ml-1 font-bold flex items-center gap-1"><AlertCircle size={10} /> This email is already associated with an account</p>}
                     </Field>
-                    <Field label="Mobile" icon={Phone}>
+                    <Field label="Personal Mobile" icon={Phone}>
                       <input required type="tel" name="mobile" value={user.mobile} onChange={handleUserChange}
-                        disabled={verified} placeholder="+91 9000000000"
-                        className={inputCls + (verified ? " opacity-60 cursor-not-allowed" : "")} />
+                        placeholder="+91 98765 43210"
+                        className={inputCls} />
                     </Field>
                   </div>
 
-                  <Field label="Password" icon={Lock}>
-                    <input required type="password" name="password" value={user.password} onChange={handleUserChange}
-                      placeholder="••••••••" className={inputCls} />
+                  <Field label="Set 4-Digit Login PIN" icon={Lock}>
+                    <input 
+                      required 
+                      type="password" 
+                      maxLength={4}
+                      name="pin" 
+                      value={user.pin} 
+                      onChange={e => setUser(p => ({ ...p, pin: e.target.value.replace(/\D/g, "") }))}
+                      placeholder="••••" 
+                      className={inputCls} 
+                    />
                   </Field>
 
 
-                  {/* OTP Block */}
-                  <div className="p-4 bg-white/5 rounded-[20px] border border-white/8 space-y-3">
+                  {/* Verification Block */}
+                  <div className="p-5 bg-[#FF5C73]/5 rounded-[24px] border border-[#FF5C73]/10 space-y-4">
                     {!verified ? (
                       !otpSent ? (
-                        <button type="button" onClick={sendOtp} disabled={sending}
-                          className="w-full py-3 bg-[#FF5C73] text-white rounded-xl font-bold text-sm hover:bg-[#FF5C73]/90 transition-all flex items-center justify-center gap-2">
-                          {sending ? <Loader2 className="animate-spin" size={16} /> : <><ShieldCheck size={16} /> Verify Identity via OTP</>}
-                        </button>
-                      ) : (
-                        <div className="flex gap-2">
-                          <input maxLength={6} value={otp} onChange={e => setOtp(e.target.value)}
-                            placeholder="6-digit OTP"
-                            className="flex-1 bg-white/10 border border-[#FF5C73]/30 rounded-xl px-4 py-3 text-white text-center font-bold tracking-[0.2em] outline-none" />
-                          <button type="button" onClick={verifyOtp} disabled={verifying || otp.length < 6}
-                            className="bg-white text-black px-5 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all disabled:opacity-50">
-                            {verifying ? <Loader2 className="animate-spin" size={16} /> : "Verify"}
+                        <div className="space-y-3">
+                          <p className="text-[11px] text-slate-400 text-center px-4">
+                            We'll send a 6-digit verification code to your email to verify your business identity.
+                          </p>
+                          <button type="button" onClick={sendOtp} disabled={sending || !user.email}
+                            className="w-full py-4 bg-white text-black rounded-2xl font-black text-sm hover:bg-slate-100 transition-all flex items-center justify-center gap-2 shadow-xl shadow-white/5 disabled:opacity-50">
+                            {sending ? <Loader2 className="animate-spin" size={18} /> : "Send Verification Code"}
                           </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="flex flex-col gap-1 items-center">
+                             <p className="text-xs font-bold text-[#FF5C73]">Code sent to {user.email}</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <input maxLength={6} value={otp} onChange={e => setOtp(e.target.value)}
+                              placeholder="0 0 0 0 0 0"
+                              className="flex-1 bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-white text-center font-black text-xl tracking-[0.3em] outline-none focus:border-[#FF5C73]/50 transition-all" />
+                            <button type="button" onClick={verifyOtp} disabled={verifying || otp.length < 6}
+                              className="bg-[#FF5C73] text-white px-8 rounded-2xl font-black text-sm hover:bg-[#FF5C73]/90 transition-all disabled:opacity-50">
+                              {verifying ? <Loader2 className="animate-spin" size={18} /> : "Verify"}
+                            </button>
+                          </div>
                         </div>
                       )
                     ) : (
-                      <div className="flex items-center justify-center gap-2 text-emerald-400 font-bold py-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                        <CheckCircle2 size={18} /> Identity Verified
+                      <div className="flex items-center justify-center gap-3 text-emerald-400 font-black py-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
+                        <div className="h-6 w-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                          <CheckCircle2 size={16} />
+                        </div>
+                        Email Verified Successfully
                       </div>
                     )}
                   </div>
@@ -432,12 +485,13 @@ export default function SignupPage() {
                         className={`w-full bg-slate-900/50 border rounded-2xl pl-10 pr-10 py-3.5 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-[#FF5C73]/20 transition-all outline-none ${
                           usernameAvailable === true ? "border-emerald-500/50" : usernameAvailable === false ? "border-rose-500/50" : "border-white/5"
                         }`} />
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
                         {checkingSlug ? <Loader2 className="animate-spin text-slate-500" size={16} /> :
                           usernameAvailable === true ? <CheckCircle2 className="text-emerald-500" size={16} /> :
-                          usernameAvailable === false ? <ShieldCheck className="text-rose-500" size={16} /> : null}
+                          usernameAvailable === false ? <ShieldAlert className="text-rose-500 animate-pulse" size={16} /> : null}
                       </div>
                     </div>
+                    {usernameAvailable === false && <p className="text-[10px] text-rose-400 mt-1 ml-1 font-bold flex items-center gap-1"><AlertCircle size={10} /> This username is already taken</p>}
                     {site.username && (
                       <p className="text-[11px] text-slate-500 ml-1">Your microsite: <span className="text-slate-300 font-semibold">gmmx.app/{site.username}</span></p>
                     )}
