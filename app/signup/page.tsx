@@ -131,6 +131,17 @@ export default function SignupPage() {
   const [countryCode, setCountryCode] = useState("+91");
   const [sentIdentifier, setSentIdentifier] = useState<string | null>(null);
 
+  // ── Step 2 state ──────────────────────────────────────────────────────────
+  const [site, setSite] = useState({ gymName: "", username: "", location: "", theme: "dark-forge", wantMicrosite: true });
+  const [usernameEdited,    setUsernameEdited]    = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [checkingSlug,      setCheckingSlug]      = useState(false);
+
+  // ── Step 3 state ──────────────────────────────────────────────────────────
+  const [selectedPlan, setSelectedPlan] = useState<string>("plan-growth");
+  const [paying,       setPaying]       = useState(false);
+  const [registering,  setRegistering]  = useState(false);
+
   // Load session state on mount
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -156,28 +167,6 @@ export default function SignupPage() {
     sessionStorage.setItem("signup_user", JSON.stringify(user));
     sessionStorage.setItem("signup_site", JSON.stringify(site));
   }, [otpSent, sentIdentifier, verified, user, site]);
-
-  // Check if already logged in
-  useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    if (token && token !== "undefined" && token !== "null") {
-      const isDev = window.location.hostname === 'localhost';
-      const targetHost = isDev ? window.location.host : 'dashboard.gmmx.app';
-      // If we had the slug stored, we would use it here. 
-      // For now, redirecting to the generic login if we can't determine the slug.
-      window.location.href = `${window.location.protocol}//${targetHost}/login`;
-    }
-  }, []);
-
-  // ── Step 2 state ──────────────────────────────────────────────────────────
-  const [site, setSite] = useState({ gymName: "", username: "", location: "", theme: "dark-forge", wantMicrosite: true });
-  const [usernameEdited,    setUsernameEdited]    = useState(false);
-  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
-  const [checkingSlug,      setCheckingSlug]      = useState(false);
-
-  // ── Step 3 state ──────────────────────────────────────────────────────────
-  const [selectedPlan, setSelectedPlan] = useState<string>("plan-growth");
-  const [paying,       setPaying]       = useState(false);
   const [registering,  setRegistering]  = useState(false);
 
   // Auto-generate username from gym name
