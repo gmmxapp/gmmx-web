@@ -167,7 +167,18 @@ export default function SignupPage() {
     sessionStorage.setItem("signup_user", JSON.stringify(user));
     sessionStorage.setItem("signup_site", JSON.stringify(site));
   }, [otpSent, sentIdentifier, verified, user, site]);
-  const [registering,  setRegistering]  = useState(false);
+
+  // Check if already logged in
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (token && token !== "undefined" && token !== "null") {
+      const isDev = window.location.hostname === 'localhost';
+      const targetHost = isDev ? window.location.host : 'dashboard.gmmx.app';
+      // If we had the slug stored, we would use it here. 
+      // For now, redirecting to the generic login if we can't determine the slug.
+      window.location.href = `${window.location.protocol}//${targetHost}/login`;
+    }
+  }, []);
 
   // Auto-generate username from gym name
   useEffect(() => {
