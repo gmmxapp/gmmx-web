@@ -8,7 +8,7 @@ type ApiErrorBody = {
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), 12000); // 12 seconds timeout
+  const id = setTimeout(() => controller.abort(), 30000); // 30 seconds timeout
 
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
