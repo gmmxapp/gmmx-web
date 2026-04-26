@@ -9,9 +9,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 20000); // Increased to 20s for slow backend
 
-    const response = await fetch(`${BACKEND_URL}/auth/check-email?email=${encodeURIComponent(email)}`, {
+    const response = await fetch(`${BACKEND_URL}/api/auth/check-email?email=${encodeURIComponent(email)}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       signal: controller.signal,
@@ -21,8 +21,11 @@ export async function GET(req: NextRequest) {
     const data = await response.json();
     if (!response.ok) return NextResponse.json(data, { status: response.status });
 
-    // Backend returns ApiResponse<Boolean> where data field is the availability
-    return NextResponse.json({ available: data.data });
+    // Return in a format apiFetch expects: { success: true, data: boolean }
+    return NextResponse.json({ 
+      success: data.success, 
+      data: data.data 
+    });
   } catch (err: any) {
     console.error(`[CHECK-EMAIL-PROXY] Backend connection failed: ${err.message}`);
     
