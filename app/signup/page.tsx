@@ -379,7 +379,8 @@ export default function SignupPage() {
         body: JSON.stringify({
         ownerName: user.ownerName,
         email: user.email,
-        phone: `${countryCode}${user.mobile.replace(/\D/g, '')}`.slice(-12),
+        phone: user.mobile.replace(/\D/g, ''),
+        countryCode: countryCode,
         pin: user.pin,
         gymName: site.gymName,
         location: site.location,
