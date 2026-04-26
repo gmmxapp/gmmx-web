@@ -139,7 +139,8 @@ export default function SignupPage() {
   const [checkingSlug,      setCheckingSlug]      = useState(false);
 
   // ── Step 3 state ──────────────────────────────────────────────────────────
-  const [selectedPlan, setSelectedPlan] = useState<string>("plan-growth");
+  const [selectedPlan, setSelectedPlan] = useState<string>("plan-growth-monthly");
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
   const [paying,       setPaying]       = useState(false);
   const [registering,  setRegistering]  = useState(false);
 
@@ -387,6 +388,8 @@ export default function SignupPage() {
         location: site.location,
         subdomain: site.username,
         hasMicrosite: site.wantMicrosite,
+        planId: selectedPlan,
+        paymentId: paymentId
       }),
       });
       setStep(STEP_DONE);
@@ -400,10 +403,11 @@ export default function SignupPage() {
   };
 
   // ─── Plans for Step 3 ─────────────────────────────────────────────────────
-  const plans = [
-    { id: "plan-free",   name: "Always Free",  price: "₹0",    desc: "Core attendance, 10 members" },
-    { id: "plan-growth", name: "Growth",        price: "₹799/mo", desc: "100 members, analytics, reminders" },
-    { id: "plan-scale",  name: "Scale",         price: "₹1299/mo", desc: "Unlimited members, white-label" },
+  const displayPlans = [
+    { id: "plan-free",   name: "Always Free",  price: "₹0",    desc: "Core attendance, 25 members", period: "both" },
+    { id: `plan-starter-${billingPeriod}`, name: "Starter",  price: billingPeriod === "monthly" ? "₹499/mo" : "₹399/mo", desc: "100 members, QR scan, reports", period: billingPeriod },
+    { id: `plan-growth-${billingPeriod}`, name: "Growth",   price: billingPeriod === "monthly" ? "₹999/mo" : "₹799/mo", desc: "300 members, WhatsApp, microsite", period: billingPeriod },
+    { id: `plan-scale-${billingPeriod}`, name: "Scale",    price: billingPeriod === "monthly" ? "₹1499/mo" : "₹1199/mo", desc: "Unlimited, multi-branch, VIP support", period: billingPeriod },
   ];
 
   return (
@@ -694,8 +698,29 @@ export default function SignupPage() {
                 <StepBar current={STEP_PAY} />
                 <h2 className="text-lg font-black text-white mb-6 flex items-center gap-2"><CreditCard size={20} className="text-[#FF5C73]" /> Choose Your Plan</h2>
 
+                <div className="flex justify-center mb-6">
+                  <div className="bg-white/5 p-1 rounded-xl border border-white/10 flex items-center">
+                    <button
+                      onClick={() => setBillingPeriod("monthly")}
+                      className={`px-6 py-2 rounded-lg font-bold text-xs transition-all ${
+                        billingPeriod === "monthly" ? "bg-white text-black" : "text-slate-500 hover:text-white"
+                      }`}
+                    >
+                      Monthly
+                    </button>
+                    <button
+                      onClick={() => setBillingPeriod("yearly")}
+                      className={`px-6 py-2 rounded-lg font-bold text-xs transition-all ${
+                        billingPeriod === "yearly" ? "bg-white text-black" : "text-slate-500 hover:text-white"
+                      }`}
+                    >
+                      Yearly
+                    </button>
+                  </div>
+                </div>
+
                 <div className="space-y-3 mb-6">
-                  {plans.map(p => (
+                  {displayPlans.map(p => (
                     <button key={p.id} type="button" onClick={() => setSelectedPlan(p.id)}
                       className={`w-full text-left p-4 rounded-2xl border transition-all ${
                         selectedPlan === p.id
@@ -709,6 +734,9 @@ export default function SignupPage() {
                         </div>
                         <div className="text-right">
                           <p className="font-black text-white">{p.price}</p>
+                          <p className="text-[10px] text-slate-600 uppercase font-black tracking-widest">
+                            {p.id === "plan-free" ? "" : billingPeriod === "yearly" ? "Billed Yearly" : "Monthly"}
+                          </p>
                           {selectedPlan === p.id && <CheckCircle2 size={16} className="text-[#FF5C73] ml-auto mt-1" />}
                         </div>
                       </div>

@@ -1,4 +1,4 @@
-export type PlanType = "saas-monthly" | "website-package";
+export type PlanType = "saas-monthly" | "saas-yearly" | "saas-free" | "website-package";
 
 export type PlanDefinition = {
   id: string;
@@ -16,61 +16,122 @@ export type PlanDefinition = {
 
 export const saasPlans: PlanDefinition[] = [
   {
-    id: "starter-monthly",
+    id: "plan-free",
+    type: "saas-free",
+    name: "Free",
+    badge: "Always Free",
+    description: "Perfect for trainers and small pilots just getting started.",
+    amountInPaise: 0,
+    currency: "INR",
+    ctaLabel: "Get Started",
+    features: [
+      "Up to 25 members",
+      "Digital attendance",
+      "Basic lead capture",
+      "Community support",
+      "Core dashboard access"
+    ]
+  },
+  // ─── MONTHLY PLANS ──────────────────────────────────────────────────────────
+  {
+    id: "plan-starter-monthly",
     type: "saas-monthly",
     name: "Starter",
-    badge: "Best for New Gyms",
-    description: "Launch and automate your first branch.",
+    badge: "Monthly",
+    description: "The essential toolkit for growing professional gyms.",
     amountInPaise: 49900,
     currency: "INR",
-    ctaLabel: "Pay with Razorpay",
+    ctaLabel: "Start Free Trial",
     features: [
-      "1 branch",
-      "100 members",
-      "Attendance",
-      "Fee reminders",
-      "Trainer dashboard",
-      "Mobile app access",
-      "QR check-in"
+      "Up to 100 members",
+      "QR scan attendance",
+      "Fee payment tracking",
+      "Manual fee reminders",
+      "Basic business reports"
     ]
   },
   {
-    id: "growth-monthly",
+    id: "plan-growth-monthly",
     type: "saas-monthly",
     name: "Growth",
-    badge: "Most Popular",
-    description: "Scale operations, marketing, and retention.",
+    badge: "Monthly",
+    description: "Our most popular plan for serious gym owners scaling fast.",
     amountInPaise: 99900,
     currency: "INR",
-    ctaLabel: "Pay with Razorpay",
+    ctaLabel: "Start Free Trial",
     isPopular: true,
     features: [
-      "Everything in Starter",
-      "White-label microsite",
-      "Lead CRM",
-      "Trainer workflows",
-      "Member streaks",
-      "Progress charts",
-      "WhatsApp reminders"
+      "Up to 300 members",
+      "WhatsApp automation",
+      "Automated fee alerts",
+      "Trainer management",
+      "Custom gym microsite",
+      "Advanced CRM tools"
     ]
   },
   {
-    id: "pro-monthly",
+    id: "plan-scale-monthly",
     type: "saas-monthly",
-    name: "Pro",
-    badge: "For Multi-Branch Operators",
-    description: "Run high-volume gyms with advanced controls.",
+    name: "Scale",
+    badge: "Monthly",
+    description: "The complete OS for elite gyms and multi-branch operations.",
     amountInPaise: 149900,
     currency: "INR",
-    ctaLabel: "Pay with Razorpay",
+    ctaLabel: "Start Free Trial",
     features: [
-      "Everything in Growth",
-      "Multi-branch",
-      "Advanced analytics",
-      "Premium automations",
-      "Lead conversion funnel",
-      "Staff leave workflows",
-      "Owner business dashboard"
+      "Unlimited members",
+      "Full business automation",
+      "White-label microsite",
+      "Multi-branch support",
+      "Advanced API access",
+      "24/7 VIP support"
+    ]
+  },
+  // ─── YEARLY PLANS ───────────────────────────────────────────────────────────
+  {
+    id: "plan-starter-yearly",
+    type: "saas-yearly",
+    name: "Starter",
+    badge: "Yearly",
+    description: "Annual plan for consistent growing professional gyms.",
+    amountInPaise: 39900 * 12, // 399 * 12
+    currency: "INR",
+    ctaLabel: "Start Free Trial",
+    features: [
+      "Up to 100 members",
+      "Everything in Monthly",
+      "Priority onboarding"
+    ]
+  },
+  {
+    id: "plan-growth-yearly",
+    type: "saas-yearly",
+    name: "Growth",
+    badge: "Yearly",
+    description: "Best value for scaling fast with annual commitment.",
+    amountInPaise: 79900 * 12, // 799 * 12
+    currency: "INR",
+    ctaLabel: "Start Free Trial",
+    isPopular: true,
+    features: [
+      "Up to 300 members",
+      "Everything in Monthly",
+      "20% Discount included"
+    ]
+  },
+  {
+    id: "plan-scale-yearly",
+    type: "saas-yearly",
+    name: "Scale",
+    badge: "Yearly",
+    description: "Full OS with the best annual rate for multi-branch ops.",
+    amountInPaise: 119900 * 12, // 1199 * 12
+    currency: "INR",
+    ctaLabel: "Start Free Trial",
+    features: [
+      "Unlimited members",
+      "Everything in Monthly",
+      "Dedicated account manager"
     ]
   }
 ];
