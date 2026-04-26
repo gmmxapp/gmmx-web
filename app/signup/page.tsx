@@ -121,14 +121,41 @@ export default function SignupPage() {
 
   // ── Step 1 state ──────────────────────────────────────────────────────────
   const [user, setUser] = useState({ ownerName: "", email: "", mobile: "", pin: "" });
-  const [otpSent,    setOtpSent]    = useState(false);
-  const [otp,        setOtp]        = useState("");
-  const [sending,    setSending]    = useState(false);
-  const [verifying,  setVerifying]  = useState(false);
-  const [verified,   setVerified]   = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [sending, setSending] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [verified, setVerified] = useState(false);
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [countryCode, setCountryCode] = useState("+91");
+  const [sentIdentifier, setSentIdentifier] = useState<string | null>(null);
+
+  // Load session state on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    const savedOtpSent = sessionStorage.getItem("otpSent") === "true";
+    const savedIdentifier = sessionStorage.getItem("sentIdentifier");
+    const savedVerified = sessionStorage.getItem("verified") === "true";
+    const savedUser = sessionStorage.getItem("signup_user");
+    const savedSite = sessionStorage.getItem("signup_site");
+
+    if (savedOtpSent) setOtpSent(true);
+    if (savedIdentifier) setSentIdentifier(savedIdentifier);
+    if (savedVerified) setVerified(true);
+    if (savedUser) setUser(JSON.parse(savedUser));
+    if (savedSite) setSite(JSON.parse(savedSite));
+  }, []);
+
+  // Save state to session whenever it changes
+  useEffect(() => {
+    sessionStorage.setItem("otpSent", otpSent.toString());
+    if (sentIdentifier) sessionStorage.setItem("sentIdentifier", sentIdentifier);
+    sessionStorage.setItem("verified", verified.toString());
+    sessionStorage.setItem("signup_user", JSON.stringify(user));
+    sessionStorage.setItem("signup_site", JSON.stringify(site));
+  }, [otpSent, sentIdentifier, verified, user, site]);
 
   // Check if already logged in
   useEffect(() => {
@@ -245,6 +272,13 @@ export default function SignupPage() {
   const sendOtp = async () => {
     if (!user.email) { setError("Please enter your email address first"); return; }
     if (emailAvailable === false) { setError("This email is already registered. Please login instead."); return; }
+    
+    // IF already sent for THIS email, just show the input field
+    if (otpSent && sentIdentifier === user.email) {
+      // Logic would already be showing the input, but this prevents duplicate API calls
+      return;
+    }
+
     setSending(true); setError(null);
     try {
       await apiFetch("/auth/send-otp", {
@@ -252,6 +286,7 @@ export default function SignupPage() {
         body: JSON.stringify({ identifier: user.email }),
       });
       setOtpSent(true);
+      setSentIdentifier(user.email);
     } catch (e: any) { 
       console.error("Send OTP Error:", e);
       setError(e.message); 
@@ -453,7 +488,7 @@ export default function SignupPage() {
                           <p className="text-[11px] text-slate-400 text-center px-4">
                             We'll send a 6-digit verification code to your email to verify your business identity.
                           </p>
-                          <button type="button" onClick={sendOtp} disabled={sending || !user.email}
+                          <button type="button" onClick={sendOtp} disabled={sending || !user.email || emailAvailable === false}
                             className="w-full py-4 bg-white text-black rounded-2xl font-black text-sm hover:bg-slate-100 transition-all flex items-center justify-center gap-2 shadow-xl shadow-white/5 disabled:opacity-50">
                             {sending ? <Loader2 className="animate-spin" size={18} /> : "Send Verification Code"}
                           </button>
@@ -461,7 +496,16 @@ export default function SignupPage() {
                       ) : (
                         <div className="space-y-4">
                           <div className="flex flex-col gap-1 items-center">
-                             <p className="text-xs font-bold text-[#FF5C73]">Code sent to {user.email}</p>
+                             <div className="flex items-center gap-2">
+                               <p className="text-xs font-bold text-[#FF5C73]">Code sent to {user.email}</p>
+                               <button 
+                                 type="button" 
+                                 onClick={() => { setOtpSent(false); setOtp(""); }}
+                                 className="text-[10px] text-slate-500 hover:text-white underline font-bold"
+                               >
+                                 Change
+                               </button>
+                             </div>
                           </div>
                           <div className="flex gap-2">
                             <input maxLength={6} value={otp} onChange={e => setOtp(e.target.value)}
@@ -472,14 +516,26 @@ export default function SignupPage() {
                               {verifying ? <Loader2 className="animate-spin" size={18} /> : "Verify"}
                             </button>
                           </div>
+                          <p className="text-[10px] text-slate-500 text-center">
+                            Didn't get the code? <button type="button" onClick={() => { setOtpSent(false); sendOtp(); }} className="text-[#FF5C73] hover:underline font-bold">Resend</button>
+                          </p>
                         </div>
                       )
                     ) : (
-                      <div className="flex items-center justify-center gap-3 text-emerald-400 font-black py-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
-                        <div className="h-6 w-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                          <CheckCircle2 size={16} />
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-center gap-3 text-emerald-400 font-black py-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
+                          <div className="h-6 w-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                            <CheckCircle2 size={16} />
+                          </div>
+                          Email Verified Successfully
                         </div>
-                        Email Verified Successfully
+                        <button 
+                          type="button" 
+                          onClick={() => { setVerified(false); setOtpSent(false); setOtp(""); sessionStorage.removeItem("verified"); }}
+                          className="text-[10px] text-slate-500 hover:text-white underline font-bold self-center"
+                        >
+                          Use a different email
+                        </button>
                       </div>
                     )}
                   </div>
