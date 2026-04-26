@@ -187,19 +187,24 @@ export default function SignupPage() {
     setSite(p => ({ ...p, username: slug }));
   }, [site.gymName, usernameEdited]);
 
-  // Debounced email availability check
-  useEffect(() => {
-    if (!user.email || !user.email.includes("@")) { setEmailAvailable(null); return; }
-    const t = setTimeout(async () => {
-      setCheckingEmail(true);
-      try {
-        const r = await apiFetch<{ available: boolean }>(`/auth/check-email?email=${encodeURIComponent(user.email)}`);
-        setEmailAvailable(r.available);
-      } catch { setEmailAvailable(null); }
-      finally { setCheckingEmail(false); }
-    }, 800);
-    return () => clearTimeout(t);
-  }, [user.email]);
+  const checkEmailAvailability = async () => {
+    if (!user.email || !user.email.includes("@")) { 
+      setEmailAvailable(null); 
+      return; 
+    }
+    setCheckingEmail(true);
+    try {
+      // Note: Backend might return success: true/false with available in data
+      const r = await apiFetch<{ available: boolean }>(`/auth/check-email?email=${encodeURIComponent(user.email)}`);
+      // Based on our ApiResponse structure, apiFetch usually returns the 'data' part
+      // If apiFetch returns the full response, we'd use r.data.available
+      setEmailAvailable(r.available);
+    } catch { 
+      setEmailAvailable(null); 
+    } finally { 
+      setCheckingEmail(false); 
+    }
+  };
 
   // Debounced slug availability check
   useEffect(() => {
@@ -221,6 +226,9 @@ export default function SignupPage() {
     if (e.target.name === "ownerName") {
       // Prevent numbers in name
       if (/\d/.test(e.target.value)) return;
+    }
+    if (e.target.name === "email") {
+      setEmailAvailable(null);
     }
     setUser(p => ({ ...p, [e.target.name]: e.target.value }));
     setError(null);
@@ -435,7 +443,9 @@ export default function SignupPage() {
                   <div className="space-y-4">
                     <Field label="Business Email" icon={Mail}>
                       <div className="relative group">
-                        <input required type="email" name="email" value={user.email} onChange={handleUserChange}
+                        <input required type="email" name="email" value={user.email} 
+                          onChange={handleUserChange}
+                          onBlur={checkEmailAvailability}
                           disabled={verified} placeholder="e.g., owner@titanfitness.com"
                           className={inputCls + (verified ? " opacity-60 cursor-not-allowed" : "") + (emailAvailable === false ? " border-rose-500/50 pr-12" : "")} />
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
