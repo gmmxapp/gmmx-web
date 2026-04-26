@@ -392,7 +392,7 @@ export default function SignupPage() {
       setTimeout(() => {
         const isDev = window.location.hostname === 'localhost';
         const targetHost = isDev ? window.location.host : 'dashboard.gmmx.app';
-        window.location.href = `${window.location.protocol}//${targetHost}/${site.username}/owner`;
+        window.location.href = `${window.location.protocol}//${targetHost}/${site.username}/dashboard`;
       }, 3000);
     } catch (e: any) { setError(e.message); }
     finally { setRegistering(false); setPaying(false); }
