@@ -194,11 +194,8 @@ export default function SignupPage() {
     }
     setCheckingEmail(true);
     try {
-      // Note: Backend might return success: true/false with available in data
-      const r = await apiFetch<{ available: boolean }>(`/auth/check-email?email=${encodeURIComponent(user.email)}`);
-      // Based on our ApiResponse structure, apiFetch usually returns the 'data' part
-      // If apiFetch returns the full response, we'd use r.data.available
-      setEmailAvailable(r.available);
+      const r = await apiFetch<{ success: boolean; data: boolean }>(`/auth/check-email?email=${encodeURIComponent(user.email)}`);
+      setEmailAvailable(r.data);
     } catch { 
       setEmailAvailable(null); 
     } finally { 
@@ -212,10 +209,11 @@ export default function SignupPage() {
     const t = setTimeout(async () => {
       setCheckingSlug(true);
       try {
-        await apiFetch<any>(`/tenants/lookup/${site.username}`);
-        setUsernameAvailable(false);
+        // Use check-slug instead of lookup to avoid 400 error in console when not found
+        const r = await apiFetch<{ success: boolean; data: boolean }>(`/tenants/check-slug/${site.username}`);
+        setUsernameAvailable(r.data); // data=true means available
       } catch {
-        setUsernameAvailable(true);
+        setUsernameAvailable(null);
       }
       finally { setCheckingSlug(false); }
     }, 500);
