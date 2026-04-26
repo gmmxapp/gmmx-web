@@ -27,7 +27,7 @@ import {
   AlertCircle,
   ShieldAlert,
 } from "lucide-react";
-import { registerOwner } from "@/lib/api";
+import { registerOwner, apiFetch } from "@/lib/api";
 import StarBorder from "@/components/star-border";
 
 declare global {
@@ -153,9 +153,8 @@ export default function SignupPage() {
     const t = setTimeout(async () => {
       setCheckingEmail(true);
       try {
-        const r = await fetch(`/api/auth/check-email?email=${encodeURIComponent(user.email)}`);
-        const d = await r.json();
-        setEmailAvailable(d.available);
+        const r = await apiFetch<any>(`/auth/check-email?email=${encodeURIComponent(user.email)}`);
+        setEmailAvailable(r.data); // Actually, the backend response format is an ApiResponse<Boolean> which has data field
       } catch { setEmailAvailable(null); }
       finally { setCheckingEmail(false); }
     }, 800);
@@ -168,9 +167,8 @@ export default function SignupPage() {
     const t = setTimeout(async () => {
       setCheckingSlug(true);
       try {
-        const r = await fetch(`/api/check-slug?slug=${site.username}`);
-        const d = await r.json();
-        setUsernameAvailable(d.available);
+        const r = await apiFetch<any>(`/tenants/lookup/${site.username}`);
+        setUsernameAvailable(r.data); // data contains boolean true/false for availability
       } catch { setUsernameAvailable(null); }
       finally { setCheckingSlug(false); }
     }, 500);
@@ -230,15 +228,15 @@ export default function SignupPage() {
     if (emailAvailable === false) { setError("This email is already registered. Please login instead."); return; }
     setSending(true); setError(null);
     try {
-      const r = await fetch("/api/otp/send", {
+      await apiFetch("/auth/send-otp", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: user.email }),
       });
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.error || "Failed to send OTP");
       setOtpSent(true);
-    } catch (e: any) { setError(e.message); }
+    } catch (e: any) { 
+      console.error("Send OTP Error:", e);
+      setError(e.message); 
+    }
     finally { setSending(false); }
   };
 
@@ -247,13 +245,10 @@ export default function SignupPage() {
     if (otp.length < 6) return;
     setVerifying(true); setError(null);
     try {
-      const r = await fetch("/api/otp/verify", {
+      await apiFetch("/auth/verify-otp", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: user.email, otp }),
       });
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.error || "Invalid OTP");
       setVerified(true);
     } catch (e: any) { setError(e.message); }
     finally { setVerifying(false); }
@@ -331,8 +326,9 @@ export default function SignupPage() {
       });
       setStep(STEP_DONE);
       setTimeout(() => {
-        const host = window.location.host; // gets "localhost:3000" or "gmmx.app"
-        window.location.href = `${window.location.protocol}//${site.username}.${host}/login`;
+        const isDev = window.location.hostname === 'localhost';
+        const targetHost = isDev ? window.location.host : 'dashboard.gmmx.app';
+        window.location.href = `${window.location.protocol}//${targetHost}/${site.username}/dashboard`;
       }, 3000);
     } catch (e: any) { setError(e.message); }
     finally { setRegistering(false); setPaying(false); }

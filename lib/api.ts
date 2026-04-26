@@ -7,22 +7,42 @@ type ApiErrorBody = {
 };
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {})
-    },
-    cache: "no-store"
-  });
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), 12000); // 12 seconds timeout
 
-  if (!response.ok) {
-    const body = (await response.json().catch(() => ({}))) as ApiErrorBody;
-    const details = body.details?.length ? ` ${body.details.join("; ")}` : "";
-    throw new Error(body.error ?? body.message ?? `Request failed (${response.status})${details}`);
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...(init?.headers ?? {})
+      },
+      cache: "no-store"
+    });
+
+    clearTimeout(id);
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      let body = {} as ApiErrorBody;
+      try { body = JSON.parse(text); } catch { body.message = text; }
+      console.error(`[API ERROR] ${path}:`, response.status, body);
+      
+      const details = body.details?.length ? ` ${body.details.join("; ")}` : "";
+      throw new Error(body.error ?? body.message ?? `Request failed (${response.status})${details}`);
+    }
+
+    return response.json() as Promise<T>;
+  } catch (error: any) {
+    clearTimeout(id);
+    if (error.name === 'AbortError') {
+      console.error(`[API TIMEOUT] ${path} took longer than 12 seconds.`);
+      throw new Error(`Connection timed out fetching from backend. Check if api.gmmx.app is accessible.`);
+    }
+    console.error(`[API FETCH FAILED] ${path}:`, error);
+    throw error;
   }
-
-  return response.json() as Promise<T>;
 }
 
 export type RegisterOwnerPayload = {
@@ -69,10 +89,19 @@ export type CreateUserResponse = {
 };
 
 export async function registerOwner(payload: RegisterOwnerPayload) {
-  const response = await fetch("/api/auth/owner/register", {
+  const backendPayload = {
+    gymName: payload.gymName,
+    subdomain: payload.slug,
+    ownerName: payload.ownerName,
+    email: payload.email,
+    phone: payload.mobile,
+    pin: payload.pin
+  };
+
+  const response = await fetch(`${API_BASE_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(backendPayload)
   });
 
   if (!response.ok) {
@@ -84,15 +113,15 @@ export async function registerOwner(payload: RegisterOwnerPayload) {
 }
 
 export function fetchPublicGymProfile(slug: string) {
-  return apiFetch<PublicGymProfile>(`/api/public/${slug}`);
+  return apiFetch<any>(`/tenants/lookup/${slug}`);
 }
 
 export function fetchDashboardSummary(tenantSlug: string) {
-  return apiFetch<DashboardSummary>(`/api/dashboard/summary?tenantSlug=${tenantSlug}`);
+  return apiFetch<any>(`/dashboard/summary?tenantSlug=${tenantSlug}`);
 }
 
 export function createMember(payload: CreateUserPayload) {
-  return apiFetch<CreateUserResponse>("/api/member", {
+  return apiFetch<CreateUserResponse>("/member", {
     method: "POST",
     body: JSON.stringify(payload)
   });
