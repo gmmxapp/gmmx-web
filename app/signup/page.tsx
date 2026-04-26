@@ -26,6 +26,7 @@ import {
   Rocket,
   AlertCircle,
   ShieldAlert,
+  ChevronDown,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import StarBorder from "@/components/star-border";
@@ -194,7 +195,7 @@ export default function SignupPage() {
     }
     setCheckingEmail(true);
     try {
-      const r = await apiFetch<{ success: boolean; data: boolean }>(`/auth/check-email?email=${encodeURIComponent(user.email)}`);
+      const r = await apiFetch<{ success: boolean; data: boolean }>(`/api/auth/check-email?email=${encodeURIComponent(user.email)}`);
       setEmailAvailable(r.data);
     } catch { 
       setEmailAvailable(null); 
@@ -457,20 +458,25 @@ export default function SignupPage() {
                     </Field>
                     <Field label="Personal Mobile" icon={Phone}>
                       <div className="flex gap-2">
-                        <select 
-                          value={countryCode} 
-                          onChange={(e) => setCountryCode(e.target.value)}
-                          className="bg-slate-900/50 border border-white/5 rounded-2xl px-3 py-3.5 text-white outline-none focus:ring-2 focus:ring-[#FF5C73]/20 appearance-none cursor-pointer"
-                        >
-                          <option value="+91">🇮🇳 +91</option>
-                          <option value="+1">🇺🇸 +1</option>
-                          <option value="+44">🇬🇧 +44</option>
-                          <option value="+971">🇦🇪 +971</option>
-                          <option value="+61">🇦🇺 +61</option>
-                        </select>
+                        <div className="relative">
+                          <select 
+                            value={countryCode} 
+                            onChange={(e) => setCountryCode(e.target.value)}
+                            className="bg-slate-900/50 border border-white/5 rounded-2xl pl-11 pr-8 py-3.5 text-white outline-none focus:ring-2 focus:ring-[#FF5C73]/20 appearance-none cursor-pointer transition-all"
+                          >
+                            <option value="+91">🇮🇳 +91</option>
+                            <option value="+1">🇺🇸 +1</option>
+                            <option value="+44">🇬🇧 +44</option>
+                            <option value="+971">🇦🇪 +971</option>
+                            <option value="+61">🇦🇺 +61</option>
+                          </select>
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                            <ChevronDown size={14} />
+                          </div>
+                        </div>
                         <input required type="tel" name="mobile" value={user.mobile} onChange={handleUserChange}
                           placeholder="98765 43210"
-                          className={inputCls} />
+                          className="w-full bg-slate-900/50 border border-white/5 rounded-2xl px-5 py-3.5 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-[#FF5C73]/20 transition-all outline-none" />
                       </div>
                     </Field>
                   </div>
