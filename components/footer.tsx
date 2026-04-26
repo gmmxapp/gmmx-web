@@ -133,7 +133,7 @@ export function Footer() {
                 <li><Link href="/about" className="transition-colors hover:text-[#FF5C73]">About Us</Link></li>
                 <li><Link href="/blog" className="transition-colors hover:text-[#FF5C73]">Blog</Link></li>
                 <li><Link href="/contact" className="transition-colors hover:text-[#FF5C73]">Contact</Link></li>
-                <li><Link href="#" className="transition-colors hover:text-[#FF5C73]">Success Stories</Link></li>
+                <li><Link href="/blog" className="transition-colors hover:text-[#FF5C73]">Success Stories</Link></li>
               </ul>
             </div>
 
@@ -163,9 +163,9 @@ export function Footer() {
             <div>
               <h3 className="text-xs font-bold uppercase tracking-widest text-white">Legal</h3>
               <ul className="mt-6 space-y-4 text-sm text-slate-400">
-                <li><Link href="#" className="transition-colors hover:text-[#FF5C73]">Privacy Policy</Link></li>
-                <li><Link href="#" className="transition-colors hover:text-[#FF5C73]">Terms of Service</Link></li>
-                <li><Link href="#" className="transition-colors hover:text-[#FF5C73]">Refund Policy</Link></li>
+                <li><Link href="/privacy" className="transition-colors hover:text-[#FF5C73]">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="transition-colors hover:text-[#FF5C73]">Terms of Service</Link></li>
+                <li><Link href="/refund-policy" className="transition-colors hover:text-[#FF5C73]">Refund Policy</Link></li>
               </ul>
             </div>
           </div>
@@ -173,9 +173,17 @@ export function Footer() {
 
         {/* BOTTOM */}
         <div className="mt-20 flex flex-col items-center justify-between border-t border-white/10 pt-8 sm:flex-row">
-          <p className="text-sm font-medium text-slate-500">
-            © {new Date().getFullYear()} GMMX Technologies. All rights reserved.
-          </p>
+          <div className="flex flex-col gap-2">
+            <p className="text-sm font-medium text-slate-500">
+              © {new Date().getFullYear()} GMMX Technologies. All rights reserved.
+            </p>
+            <p className="text-[10px] text-slate-600 uppercase tracking-widest font-bold">
+              Business Identity: GMMX Gym SaaS Platform | Tamil Nadu, India
+            </p>
+          </div>
+          <div className="mt-4 flex gap-6 sm:mt-0 opacity-50">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Verified Secure Payments</span>
+          </div>
         </div>
       </div>
     </footer>

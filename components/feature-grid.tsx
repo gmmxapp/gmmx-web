@@ -94,21 +94,21 @@ function SpotlightCard({ children }: { children: React.ReactNode }) {
 ================================ */
 const features = [
   {
-    title: "Smart lead capture",
+    title: "Member Enrollment",
     description:
-      "Turn website visitors into trackable leads with auto follow-up workflows.",
+      "Manage new member signups and lead pipelines with structured management tools.",
     image: "/smartLead.png",
   },
   {
-    title: "QR attendance in seconds",
+    title: "QR Attendance tracking",
     description:
-      "Generate secure QR codes and simplify check-ins.",
+      "Modernize your gym with secure, digital check-ins for all your members.",
     image: "/qr-attendance.png",
   },
   {
-    title: "WhatsApp fee reminders",
+    title: "Fee Management Alerts",
     description:
-      "Automate reminder nudges that recover dues on time.",
+      "Keep members informed with automated reminders for subscription renewals.",
     image: "/whatsapp.jpg",
   },
   {

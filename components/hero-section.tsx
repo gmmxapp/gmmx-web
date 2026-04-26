@@ -38,9 +38,9 @@ export function HeroSection() {
           <span className="whitespace-nowrap">Run Your Gym With</span>
           <RotatingText
             texts={[
-              "Autopilot",
+              "Efficiency",
               "QR Check-ins",
-              "98% Retention",
+              "Retention",
               "Microsites"
             ]}
             mainClassName="inline-flex justify-center items-center h-[60px] sm:h-[80px] lg:h-[95px] overflow-hidden rounded-2xl bg-[#FF5C73] px-4 sm:px-6 py-0 text-white shadow-[0_0_30px_rgba(255,92,115,0.4)] whitespace-nowrap"
@@ -56,7 +56,7 @@ export function HeroSection() {
         </h1>
 
         <p className="mt-2 max-w-3xl text-lg font-medium leading-relaxed text-slate-600 dark:text-slate-300 sm:text-xl">
-          Automate QR check-ins, WhatsApp renewals, trainer workflows, member apps, and gym microsites — all from one powerful operating system.
+          Streamline QR check-ins, member reminders, trainer workflows, and professional microsites — all from one powerful management platform.
         </p>
 
         <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">

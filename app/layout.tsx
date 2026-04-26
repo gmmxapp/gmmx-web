@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope, Space_Grotesk, Geist } from "next/font/google";
+import { Manrope, Space_Grotesk, Geist, Plus_Jakarta_Sans } from "next/font/google";
 import { Navbar } from "@/components/navbar";
 import { siteConfig, siteUrl } from "@/lib/site";
 import "./globals.css";
@@ -9,6 +9,11 @@ import { SmoothScrollProvider } from "@/components/smooth-scroll";
 
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-pjs",
+});
 
 const bodyFont = Manrope({
   subsets: ["latin"],
@@ -58,8 +63,8 @@ import { Toaster } from "sonner";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("dark", "font-sans", geist.variable)} suppressHydrationWarning>
-      <body className={`${bodyFont.variable} ${headingFont.variable} antialiased bg-[#05050A] text-white selection:bg-rose-500/30 selection:text-white`}>
+    <html lang="en" className={cn("dark", "font-sans", geist.variable, plusJakartaSans.variable)} suppressHydrationWarning>
+      <body className={`${bodyFont.variable} ${headingFont.variable} ${plusJakartaSans.variable} antialiased bg-[#05050A] text-white selection:bg-rose-500/30 selection:text-white`}>
         <SmoothScrollProvider>
           <Navbar />
           {children}

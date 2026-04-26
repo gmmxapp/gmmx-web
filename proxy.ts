@@ -18,27 +18,25 @@ function getSlugFromHost(host: string): string | null {
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const host = request.headers.get("host") ?? "";
+  const slug = getSlugFromHost(host);
 
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
     pathname.includes(".") ||
     pathname.startsWith("/signup") ||
-    pathname.startsWith("/pricing") ||
-    pathname === "/"
+    pathname.startsWith("/pricing")
   ) {
     return NextResponse.next();
   }
-
-  const host = request.headers.get("host") ?? "";
-  const slug = getSlugFromHost(host);
 
   if (!slug || slug === "www" || slug === "app") {
     return NextResponse.next();
   }
 
   const rewriteUrl = request.nextUrl.clone();
-  rewriteUrl.pathname = `/${slug}${pathname}`;
+  rewriteUrl.pathname = pathname === "/" ? `/${slug}` : `/${slug}${pathname}`;
   return NextResponse.rewrite(rewriteUrl);
 }
 

@@ -57,7 +57,7 @@ export default function BlogPage() {
                 <p className="text-slate-400 font-medium leading-relaxed mb-6">
                   {post.excerpt}
                 </p>
-                <Link href="#" className="flex items-center gap-2 text-sm font-black text-white group-hover:gap-4 transition-all">
+                <Link href="/contact" className="flex items-center gap-2 text-sm font-black text-white group-hover:gap-4 transition-all">
                   Read Article <ArrowRight size={16} className="text-[#FF5C73]" />
                 </Link>
               </CardContent>

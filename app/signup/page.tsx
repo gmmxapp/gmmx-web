@@ -27,7 +27,7 @@ import {
   AlertCircle,
   ShieldAlert,
 } from "lucide-react";
-import { registerOwner, apiFetch } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import StarBorder from "@/components/star-border";
 
 declare global {
@@ -128,6 +128,19 @@ export default function SignupPage() {
   const [verified,   setVerified]   = useState(false);
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
   const [checkingEmail, setCheckingEmail] = useState(false);
+  const [countryCode, setCountryCode] = useState("+91");
+
+  // Check if already logged in
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (token && token !== "undefined" && token !== "null") {
+      const isDev = window.location.hostname === 'localhost';
+      const targetHost = isDev ? window.location.host : 'dashboard.gmmx.app';
+      // If we had the slug stored, we would use it here. 
+      // For now, redirecting to the generic login if we can't determine the slug.
+      window.location.href = `${window.location.protocol}//${targetHost}/login`;
+    }
+  }, []);
 
   // ── Step 2 state ──────────────────────────────────────────────────────────
   const [site, setSite] = useState({ gymName: "", username: "", location: "", theme: "dark-forge", wantMicrosite: true });
@@ -153,8 +166,8 @@ export default function SignupPage() {
     const t = setTimeout(async () => {
       setCheckingEmail(true);
       try {
-        const r = await apiFetch<any>(`/auth/check-email?email=${encodeURIComponent(user.email)}`);
-        setEmailAvailable(r.data); // Actually, the backend response format is an ApiResponse<Boolean> which has data field
+        const r = await apiFetch<{ available: boolean }>(`/auth/check-email?email=${encodeURIComponent(user.email)}`);
+        setEmailAvailable(r.available);
       } catch { setEmailAvailable(null); }
       finally { setCheckingEmail(false); }
     }, 800);
@@ -167,15 +180,21 @@ export default function SignupPage() {
     const t = setTimeout(async () => {
       setCheckingSlug(true);
       try {
-        const r = await apiFetch<any>(`/tenants/lookup/${site.username}`);
-        setUsernameAvailable(r.data); // data contains boolean true/false for availability
-      } catch { setUsernameAvailable(null); }
+        await apiFetch<any>(`/tenants/lookup/${site.username}`);
+        setUsernameAvailable(false);
+      } catch {
+        setUsernameAvailable(true);
+      }
       finally { setCheckingSlug(false); }
     }, 500);
     return () => clearTimeout(t);
   }, [site.username]);
 
   const handleUserChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.name === "ownerName") {
+      // Prevent numbers in name
+      if (/\d/.test(e.target.value)) return;
+    }
     setUser(p => ({ ...p, [e.target.name]: e.target.value }));
     setError(null);
   };
@@ -314,21 +333,24 @@ export default function SignupPage() {
   const finalRegister = async (paymentId: string | null) => {
     setRegistering(true);
     try {
-      await registerOwner({
+      await apiFetch("/auth/register", {
+        method: "POST",
+        body: JSON.stringify({
         ownerName: user.ownerName,
         email: user.email,
-        mobile: user.mobile.replace(/\D/g, '').slice(-10),
+        phone: `${countryCode}${user.mobile.replace(/\D/g, '')}`.slice(-12),
         pin: user.pin,
         gymName: site.gymName,
         location: site.location,
-        slug: site.username,
+        subdomain: site.username,
         hasMicrosite: site.wantMicrosite,
+      }),
       });
       setStep(STEP_DONE);
       setTimeout(() => {
         const isDev = window.location.hostname === 'localhost';
         const targetHost = isDev ? window.location.host : 'dashboard.gmmx.app';
-        window.location.href = `${window.location.protocol}//${targetHost}/${site.username}/dashboard`;
+        window.location.href = `${window.location.protocol}//${targetHost}/${site.username}/owner`;
       }, 3000);
     } catch (e: any) { setError(e.message); }
     finally { setRegistering(false); setPaying(false); }
@@ -390,9 +412,22 @@ export default function SignupPage() {
                       {emailAvailable === false && <p className="text-[10px] text-rose-400 mt-1 ml-1 font-bold flex items-center gap-1"><AlertCircle size={10} /> This email is already associated with an account</p>}
                     </Field>
                     <Field label="Personal Mobile" icon={Phone}>
-                      <input required type="tel" name="mobile" value={user.mobile} onChange={handleUserChange}
-                        placeholder="+91 98765 43210"
-                        className={inputCls} />
+                      <div className="flex gap-2">
+                        <select 
+                          value={countryCode} 
+                          onChange={(e) => setCountryCode(e.target.value)}
+                          className="bg-slate-900/50 border border-white/5 rounded-2xl px-3 py-3.5 text-white outline-none focus:ring-2 focus:ring-[#FF5C73]/20 appearance-none cursor-pointer"
+                        >
+                          <option value="+91">🇮🇳 +91</option>
+                          <option value="+1">🇺🇸 +1</option>
+                          <option value="+44">🇬🇧 +44</option>
+                          <option value="+971">🇦🇪 +971</option>
+                          <option value="+61">🇦🇺 +61</option>
+                        </select>
+                        <input required type="tel" name="mobile" value={user.mobile} onChange={handleUserChange}
+                          placeholder="98765 43210"
+                          className={inputCls} />
+                      </div>
                     </Field>
                   </div>
 
@@ -663,8 +698,17 @@ export default function SignupPage() {
         </div>
 
         <p className="mt-8 text-center text-slate-500 text-sm">
-          Already using Gmmx?{" "}
-          <Link href="/login" className="text-white font-bold hover:text-[#FF5C73] transition-colors">Log in here</Link>
+          Already have an account?{" "}
+          <button 
+            onClick={() => {
+              const isDev = window.location.hostname === 'localhost';
+              const targetHost = isDev ? window.location.host : 'dashboard.gmmx.app';
+              window.location.href = `${window.location.protocol}//${targetHost}/login`;
+            }}
+            className="text-white font-bold hover:text-[#FF5C73] transition-colors cursor-pointer inline-flex items-center"
+          >
+            Log in
+          </button>
         </p>
       </div>
     </main>

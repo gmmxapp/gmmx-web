@@ -15,6 +15,7 @@ export default function DashboardPage() {
 
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const fetchSummary = useCallback(async () => {
     try {
@@ -45,11 +46,13 @@ export default function DashboardPage() {
     try {
       if (endpoint == "member") {
         await createMember(payload);
+        setSuccessMessage("Member added successfully.");
       } else {
         await createTrainer(payload);
+        setSuccessMessage("Trainer added successfully.");
       }
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Create failed");
+      setError(e instanceof Error ? e.message : "Create failed");
       return;
     }
 
@@ -58,13 +61,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="container">
-      <header className="page-head">
+    <main className="container space-y-6">
+      <header className="page-head card">
         <span className="pill">Owner Dashboard</span>
-        <h1>{slug} Dashboard</h1>
+        <h1 className="text-3xl font-black text-white mt-3">{slug} Dashboard</h1>
         <p>Track usage, manage team, and keep trial progress on one screen.</p>
       </header>
       {error && <p className="error">{error}</p>}
+      {successMessage && <p className="pill">{successMessage}</p>}
 
       {summary && (
         <section className="grid grid-3">
@@ -87,7 +91,7 @@ export default function DashboardPage() {
         </section>
       )}
 
-      <section className="grid grid-3" style={{ marginTop: 20 }}>
+      <section className="grid grid-3">
         <form className="card form-stack" onSubmit={(e) => addUser(e, "member")}>
           <h3>Add Member</h3>
           <input className="input" name="fullName" placeholder="Name" required />

@@ -121,14 +121,14 @@ export function fetchDashboardSummary(tenantSlug: string) {
 }
 
 export function createMember(payload: CreateUserPayload) {
-  return apiFetch<CreateUserResponse>("/member", {
+  return apiFetch<CreateUserResponse>("/api/members", {
     method: "POST",
     body: JSON.stringify(payload)
   });
 }
 
 export function createTrainer(payload: CreateUserPayload) {
-  return apiFetch<CreateUserResponse>("/api/trainer", {
+  return apiFetch<CreateUserResponse>("/api/trainers", {
     method: "POST",
     body: JSON.stringify(payload)
   });

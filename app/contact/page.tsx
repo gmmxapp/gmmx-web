@@ -8,6 +8,7 @@ export const metadata = {
 };
 
 export default function ContactPage() {
+  const whatsappHref = getWhatsAppLink("Hi GMMX team, I want a demo for my gym.");
   return (
     <main className="bg-[#05050A] min-h-screen">
       <div className="mx-auto max-w-7xl px-6 pt-32 pb-24">
@@ -71,7 +72,14 @@ export default function ContactPage() {
                       <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Message</label>
                       <textarea rows={4} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-[#FF5C73] transition-colors outline-none resize-none" placeholder="How can we help?" />
                    </div>
-                   <button className="w-full bg-[#FF5C73] text-white font-black py-4 rounded-xl shadow-[0_0_20px_rgba(255,92,115,0.3)] hover:opacity-90 transition-all uppercase tracking-widest text-sm">Send Inquiry</button>
+                   <a
+                     href={whatsappHref}
+                     target="_blank"
+                     rel="noreferrer"
+                     className="block w-full text-center bg-[#FF5C73] text-white font-black py-4 rounded-xl shadow-[0_0_20px_rgba(255,92,115,0.3)] hover:opacity-90 transition-all uppercase tracking-widest text-sm"
+                   >
+                     Send Inquiry
+                   </a>
                 </div>
              </div>
           </div>
