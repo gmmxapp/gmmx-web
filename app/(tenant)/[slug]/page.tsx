@@ -22,111 +22,127 @@ export default async function TenantHome({ params }: Props) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* Dynamic Header */}
-      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-black tracking-tight" style={{ color: data.themePrimary }}>
+    <div className="min-h-screen bg-[#050505] text-white selection:bg-white selection:text-black">
+      {/* Premium Header */}
+      <header className="fixed top-0 z-50 w-full border-b border-white/5 bg-black/60 backdrop-blur-xl">
+        <div className="container mx-auto flex h-20 items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-xl" style={{ backgroundColor: data.themePrimary, color: '#000' }}>
+              {data.gymName.charAt(0).toUpperCase()}
+            </div>
+            <span className="text-2xl font-black tracking-tighter uppercase italic">
               {data.gymName}
             </span>
           </div>
-          <nav className="flex items-center gap-6">
-            <Link href={`/about`} className="text-sm font-medium hover:underline underline-offset-4">About</Link>
-            <Link href={`/plans`} className="text-sm font-medium hover:underline underline-offset-4">Plans</Link>
+          <nav className="hidden md:flex items-center gap-8">
+            <Link href="#about" className="text-sm font-bold tracking-widest text-zinc-400 hover:text-white transition-colors">ABOUT</Link>
+            <Link href="#plans" className="text-sm font-bold tracking-widest text-zinc-400 hover:text-white transition-colors">PLANS</Link>
             <Link href={`/join`}>
-              <Button size="sm" style={{ backgroundColor: data.themePrimary }}>Join Now</Button>
+              <Button className="h-12 px-8 font-black tracking-widest rounded-full transition-all hover:scale-105 active:scale-95" style={{ backgroundColor: data.themePrimary, color: '#000' }}>
+                JOIN NOW
+              </Button>
             </Link>
           </nav>
         </div>
       </header>
 
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section 
-          className="relative py-24 px-6 text-center bg-zinc-900 text-white overflow-hidden"
-          style={{ borderBottom: `4px solid ${data.themePrimary}` }}
-        >
-          <div className="container relative z-10 max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tighter">
-              WELCOME TO <span style={{ color: data.themePrimary }}>{data.gymName.toUpperCase()}</span>
+      <main>
+        {/* Dynamic Hero Section */}
+        <section className="relative min-h-[90vh] flex items-center justify-center pt-20 overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute top-0 left-0 w-full h-full">
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20" style={{ backgroundColor: data.themePrimary }}></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20" style={{ backgroundColor: data.themePrimary }}></div>
+          </div>
+
+          <div className="container relative z-10 mx-auto px-6 text-center">
+            <div className="inline-block px-4 py-1.5 mb-8 rounded-full border border-white/10 bg-white/5 backdrop-blur-md">
+              <span className="text-[10px] font-black tracking-[0.2em] uppercase text-zinc-400">Premium Fitness Experience</span>
+            </div>
+            
+            <h1 className="text-6xl md:text-9xl font-black mb-8 tracking-tighter leading-none">
+              PUSH YOUR <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/20">LIMITS</span>
             </h1>
-            <p className="text-xl md:text-2xl text-zinc-400 mb-10 max-w-2xl mx-auto">
-              {data.about || "Transform your body and mind with our professional training and state-of-the-art equipment."}
+            
+            <p className="text-lg md:text-2xl text-zinc-400 mb-12 max-w-2xl mx-auto font-medium leading-relaxed">
+              {data.about || "Transform your body and mind with our elite training programs and state-of-the-art facility."}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               <Link href={`/join`}>
-                <Button size="lg" className="px-10 h-14 text-lg font-bold" style={{ backgroundColor: data.themePrimary }}>
-                  GET STARTED
+                <Button className="h-16 px-12 text-lg font-black tracking-widest rounded-full transition-all hover:shadow-[0_0_40px_rgba(255,255,255,0.1)]" style={{ backgroundColor: data.themePrimary, color: '#000' }}>
+                  START TRAINING
                 </Button>
               </Link>
-              <Link href={`/contact`}>
-                <Button variant="outline" size="lg" className="px-10 h-14 text-lg font-bold bg-transparent text-white border-white hover:bg-white hover:text-black">
-                  CONTACT US
-                </Button>
+              <Link href={`/plans`} className="text-lg font-bold tracking-widest hover:text-zinc-300 transition-colors border-b-2 border-white/20 pb-1">
+                VIEW MEMBERSHIPS
               </Link>
             </div>
           </div>
-          {/* Background decoration */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-10 pointer-events-none">
-            <div className="w-full h-full bg-gradient-to-tr from-zinc-800 to-transparent rotate-12 scale-150"></div>
+          
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-20">
+            <div className="w-px h-20 bg-gradient-to-b from-white to-transparent"></div>
           </div>
         </section>
 
-        {/* Feature Grid */}
-        <section className="py-20 bg-background">
-          <div className="container px-4 md:px-6">
+        {/* Feature Grid - Dark Cards */}
+        <section className="py-32 bg-[#080808]" id="about">
+          <div className="container mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="bg-zinc-50 border-none shadow-none">
-                <CardHeader>
-                  <CardTitle className="text-xl font-bold">Expert Trainers</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  Personalized attention from certified professionals to help you reach your goals faster and safer.
-                </CardContent>
-              </Card>
-              <Card className="bg-zinc-50 border-none shadow-none">
-                <CardHeader>
-                  <CardTitle className="text-xl font-bold">Flexible Plans</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  Monthly, quarterly, and annual memberships tailored to your fitness journey and budget.
-                </CardContent>
-              </Card>
-              <Card className="bg-zinc-50 border-none shadow-none">
-                <CardHeader>
-                  <CardTitle className="text-xl font-bold">24/7 Access</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  Train whenever fits your schedule. Our facility is equipped for all levels of athletes.
-                </CardContent>
-              </Card>
+              {[
+                { title: "Expert Coaching", desc: "Certified professionals dedicated to your growth and form.", icon: "🎯" },
+                { title: "Elite Equipment", desc: "Modern, well-maintained gear for maximum performance.", icon: "⚡" },
+                { title: "Dynamic Community", desc: "A supportive environment of like-minded fitness enthusiasts.", icon: "🤝" }
+              ].map((feature, i) => (
+                <div key={i} className="group p-10 rounded-[32px] bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all duration-500">
+                  <div className="text-4xl mb-6 grayscale group-hover:grayscale-0 transition-all">{feature.icon}</div>
+                  <h3 className="text-2xl font-black mb-4 tracking-tight uppercase italic">{feature.title}</h3>
+                  <p className="text-zinc-500 leading-relaxed group-hover:text-zinc-400 transition-colors">{feature.desc}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Location & CTA */}
-        <section className="py-20 border-t">
-          <div className="container px-4 text-center">
-            <h2 className="text-3xl font-bold mb-4">Find Us</h2>
-            <p className="text-zinc-500 mb-8 max-w-md mx-auto">{data.location}</p>
-            <div className="bg-zinc-100 p-8 rounded-2xl inline-block">
-              <p className="font-bold mb-2">Questions? Call or WhatsApp</p>
-              <a 
-                href={`https://wa.me/${data.contactPhone}`} 
-                className="text-2xl font-black hover:underline"
-                style={{ color: data.themePrimary }}
-              >
-                {data.contactPhone}
-              </a>
+        {/* Action Section */}
+        <section className="py-40 relative overflow-hidden" id="plans">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl aspect-square bg-white/5 rounded-full blur-[100px] -z-10"></div>
+          
+          <div className="container mx-auto px-6 text-center">
+            <h2 className="text-5xl md:text-7xl font-black mb-12 tracking-tighter uppercase italic">
+              Ready to join the <br />
+              <span style={{ color: data.themePrimary }}>{data.gymName}</span> squad?
+            </h2>
+            
+            <div className="inline-grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-[40px] bg-white/5 backdrop-blur-2xl border border-white/10">
+              <div className="p-10 text-left">
+                <p className="text-zinc-400 text-sm font-bold tracking-widest mb-2 uppercase">Contact Us</p>
+                <a href={`https://wa.me/${data.contactPhone}`} className="text-3xl font-black hover:opacity-80 transition-opacity">
+                  {data.contactPhone}
+                </a>
+              </div>
+              <div className="p-10 text-left border-t sm:border-t-0 sm:border-l border-white/10">
+                <p className="text-zinc-400 text-sm font-bold tracking-widest mb-2 uppercase">Location</p>
+                <p className="text-xl font-bold leading-tight">{data.location}</p>
+              </div>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t py-12 bg-zinc-950 text-zinc-500">
-        <div className="container text-center">
-          <p>© {new Date().getFullYear()} {data.gymName}. Powered by GMMX.</p>
+      <footer className="py-20 border-t border-white/5 bg-black">
+        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="text-zinc-500 text-sm font-medium">
+            © {new Date().getFullYear()} {data.gymName}. ALL RIGHTS RESERVED.
+          </div>
+          <div className="flex gap-8 text-zinc-500 text-sm font-bold tracking-widest">
+            <Link href="/privacy" className="hover:text-white transition-colors">PRIVACY</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">TERMS</Link>
+          </div>
+          <div className="font-black text-xl italic tracking-tighter" style={{ color: data.themePrimary }}>
+            GMMX.
+          </div>
         </div>
       </footer>
     </div>

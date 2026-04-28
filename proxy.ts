@@ -36,7 +36,11 @@ export function proxy(request: NextRequest) {
   }
 
   const rewriteUrl = request.nextUrl.clone();
-  rewriteUrl.pathname = pathname === "/" ? `/${slug}` : `/${slug}${pathname}`;
+  if (pathname === "/") {
+    rewriteUrl.pathname = `/(tenant)/${slug}`;
+  } else {
+    rewriteUrl.pathname = `/(tenant)/${slug}${pathname}`;
+  }
   return NextResponse.rewrite(rewriteUrl);
 }
 

@@ -15,7 +15,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
       ...init,
       signal: controller.signal,
       headers: {
-        "Content-Type": "application/json",
+        ...(init?.method && init.method !== "GET" ? { "Content-Type": "application/json" } : {}),
         ...(init?.headers ?? {})
       },
       cache: "no-store"
@@ -113,7 +113,7 @@ export async function registerOwner(payload: RegisterOwnerPayload) {
 }
 
 export function fetchPublicGymProfile(slug: string) {
-  return apiFetch<any>(`/tenants/lookup/${slug}`);
+  return apiFetch<any>(`/api/tenants/lookup/${slug}`);
 }
 
 export function fetchDashboardSummary(tenantSlug: string) {

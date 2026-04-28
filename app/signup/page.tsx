@@ -27,6 +27,7 @@ import {
   AlertCircle,
   ShieldAlert,
   ChevronDown,
+  Tag,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import StarBorder from "@/components/star-border";
@@ -131,18 +132,22 @@ export default function SignupPage() {
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [countryCode, setCountryCode] = useState("+91");
   const [sentIdentifier, setSentIdentifier] = useState<string | null>(null);
+  const [showOtpModal, setShowOtpModal] = useState(false);
 
   // ── Step 2 state ──────────────────────────────────────────────────────────
-  const [site, setSite] = useState({ gymName: "", username: "", location: "", theme: "dark-forge", wantMicrosite: true });
+  const [site, setSite] = useState({ gymName: "", username: "", location: "", about: "", theme: "dark-forge", wantMicrosite: true });
   const [usernameEdited,    setUsernameEdited]    = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checkingSlug,      setCheckingSlug]      = useState(false);
+  const [locating, setLocating] = useState(false);
 
   // ── Step 3 state ──────────────────────────────────────────────────────────
   const [selectedPlan, setSelectedPlan] = useState<string>("plan-growth-monthly");
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
   const [paying,       setPaying]       = useState(false);
   const [registering,  setRegistering]  = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponStatus, setCouponStatus] = useState<{ valid: boolean; message: string } | null>(null);
 
   // Load session state on mount
   useEffect(() => {
@@ -212,7 +217,7 @@ export default function SignupPage() {
       setCheckingSlug(true);
       try {
         // Use check-slug instead of lookup to avoid 400 error in console when not found
-        const r = await apiFetch<{ success: boolean; data: boolean }>(`/tenants/check-slug/${site.username}`);
+        const r = await apiFetch<{ success: boolean; data: boolean }>(`/api/tenants/check-slug/${site.username}`);
         setUsernameAvailable(r.data); // data=true means available
       } catch {
         setUsernameAvailable(null);
@@ -239,7 +244,6 @@ export default function SignupPage() {
     setError(null);
   };
 
-  const [locating, setLocating] = useState(false);
   const fetchLocation = () => {
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by your browser");
@@ -252,7 +256,8 @@ export default function SignupPage() {
         const { latitude, longitude } = position.coords;
         try {
           // Using Nominatim for free reverse geocoding
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`);
+          // Using internal proxy for Nominatim to avoid CORS
+          const res = await fetch(`/api/location/reverse?lat=${latitude}&lon=${longitude}`);
           const data = await res.json();
           
           // Try to get a concise address (City, State)
@@ -281,9 +286,10 @@ export default function SignupPage() {
     if (!user.email) { setError("Please enter your email address first"); return; }
     if (emailAvailable === false) { setError("This email is already registered. Please login instead."); return; }
     
+    setShowOtpModal(true);
+
     // IF already sent for THIS email, just show the input field
     if (otpSent && sentIdentifier === user.email) {
-      // Logic would already be showing the input, but this prevents duplicate API calls
       return;
     }
 
@@ -312,6 +318,7 @@ export default function SignupPage() {
         body: JSON.stringify({ identifier: user.email, otp }),
       });
       setVerified(true);
+      setShowOtpModal(false);
     } catch (e: any) { setError(e.message); }
     finally { setVerifying(false); }
   };
@@ -370,6 +377,14 @@ export default function SignupPage() {
   const handleFreeSignup = async () => {
     setRegistering(true); setError(null);
     await finalRegister(null);
+  };
+
+  const handleFinalSubmit = () => {
+    if (selectedPlan === 'plan-free') {
+      handleFreeSignup();
+    } else {
+      handlePay();
+    }
   };
 
   // ── Register owner ────────────────────────────────────────────────────────
@@ -500,46 +515,17 @@ export default function SignupPage() {
 
 
                   {/* Verification Block */}
-                  <div className="p-5 bg-[#FF5C73]/5 rounded-[24px] border border-[#FF5C73]/10 space-y-4">
+                  <div className="p-5 bg-white/5 rounded-[24px] border border-white/10 space-y-4">
                     {!verified ? (
-                      !otpSent ? (
                         <div className="space-y-3">
                           <p className="text-[11px] text-slate-400 text-center px-4">
                             We'll send a 6-digit verification code to your email to verify your business identity.
                           </p>
                           <button type="button" onClick={sendOtp} disabled={sending || !user.email || emailAvailable === false}
                             className="w-full py-4 bg-white text-black rounded-2xl font-black text-sm hover:bg-slate-100 transition-all flex items-center justify-center gap-2 shadow-xl shadow-white/5 disabled:opacity-50">
-                            {sending ? <Loader2 className="animate-spin" size={18} /> : "Send Verification Code"}
+                            {sending ? <Loader2 className="animate-spin" size={18} /> : "Verify Identity via Email OTP"}
                           </button>
                         </div>
-                      ) : (
-                        <div className="space-y-4">
-                          <div className="flex flex-col gap-1 items-center">
-                             <div className="flex items-center gap-2">
-                               <p className="text-xs font-bold text-[#FF5C73]">Code sent to {user.email}</p>
-                               <button 
-                                 type="button" 
-                                 onClick={() => { setOtpSent(false); setOtp(""); }}
-                                 className="text-[10px] text-slate-500 hover:text-white underline font-bold"
-                               >
-                                 Change
-                               </button>
-                             </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <input maxLength={6} value={otp} onChange={e => setOtp(e.target.value)}
-                              placeholder="0 0 0 0 0 0"
-                              className="flex-1 bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-white text-center font-black text-xl tracking-[0.3em] outline-none focus:border-[#FF5C73]/50 transition-all" />
-                            <button type="button" onClick={verifyOtp} disabled={verifying || otp.length < 6}
-                              className="bg-[#FF5C73] text-white px-8 rounded-2xl font-black text-sm hover:bg-[#FF5C73]/90 transition-all disabled:opacity-50">
-                              {verifying ? <Loader2 className="animate-spin" size={18} /> : "Verify"}
-                            </button>
-                          </div>
-                          <p className="text-[10px] text-slate-500 text-center">
-                            Didn't get the code? <button type="button" onClick={() => { setOtpSent(false); sendOtp(); }} className="text-[#FF5C73] hover:underline font-bold">Resend</button>
-                          </p>
-                        </div>
-                      )
                     ) : (
                       <div className="flex flex-col gap-3">
                         <div className="flex items-center justify-center gap-3 text-emerald-400 font-black py-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
@@ -574,22 +560,23 @@ export default function SignupPage() {
             {step === STEP_SITE && (
               <motion.div key="step-site" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
                 <StepBar current={STEP_SITE} />
-                <h2 className="text-lg font-black text-white mb-6 flex items-center gap-2"><Globe size={20} className="text-[#FF5C73]" /> Microsite Setup</h2>
+                <h2 className="text-lg font-black text-white mb-6 flex items-center gap-2"><Globe size={20} className="text-[#FF5C73]" /> Gym & Microsite Details</h2>
 
-                <div className="space-y-5">
+                <div className="space-y-6">
+
                   <Field label="Gym Name" icon={Dumbbell}>
                     <input required name="gymName" value={site.gymName} onChange={handleSiteChange}
                       placeholder="Titan Fitness" className={inputCls} />
                   </Field>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Unique Username</label>
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Gym Username / Slug</label>
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-sm">@</span>
                       <input required name="username" value={site.username} onChange={handleSiteChange}
                         placeholder="titan-fitness"
                         className={`w-full bg-slate-900/50 border rounded-2xl pl-10 pr-10 py-3.5 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-[#FF5C73]/20 transition-all outline-none ${
-                          usernameAvailable === true ? "border-emerald-500/50" : usernameAvailable === false ? "border-rose-500/50" : "border-white/5"
+                          usernameAvailable === true ? "border-emerald-500/50 focus:ring-emerald-500/20" : usernameAvailable === false ? "border-rose-500/50 focus:ring-rose-500/20" : "border-white/5"
                         }`} />
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
                         {checkingSlug ? <Loader2 className="animate-spin text-slate-500" size={16} /> :
@@ -599,7 +586,7 @@ export default function SignupPage() {
                     </div>
                     {usernameAvailable === false && <p className="text-[10px] text-rose-400 mt-1 ml-1 font-bold flex items-center gap-1"><AlertCircle size={10} /> This username is already taken</p>}
                     {site.username && (
-                      <p className="text-[11px] text-slate-500 ml-1">Your microsite: <span className="text-slate-300 font-semibold">gmmx.app/{site.username}</span></p>
+                      <p className="text-[11px] text-slate-500 ml-1">Your microsite: <span className="text-emerald-400 font-semibold">{site.username}.gmmx.app</span></p>
                     )}
                   </div>
 
@@ -610,81 +597,94 @@ export default function SignupPage() {
                       type="button" 
                       onClick={fetchLocation} 
                       disabled={locating}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#FF5C73] transition-colors disabled:opacity-50"
-                      title="Auto-fetch location"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-[#FF5C73] hover:text-white transition-colors disabled:opacity-50"
+                      title="Use current location"
                     >
                       {locating ? <Loader2 className="animate-spin" size={16} /> : <MapPin size={16} />}
                     </button>
                   </Field>
 
-                  <div className="pt-2">
-                    <label className="flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10 transition-colors">
+                  <div className="pt-4">
+                    <label className="flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10 transition-all shadow-lg">
                       <div className="relative flex items-center justify-center">
                         <input type="checkbox" className="sr-only" checked={site.wantMicrosite} onChange={(e) => setSite(p => ({ ...p, wantMicrosite: e.target.checked }))} />
                         <div className={`w-10 h-6 bg-slate-800 rounded-full transition-colors ${site.wantMicrosite ? 'bg-emerald-500' : ''}`}></div>
-                        <div className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform ${site.wantMicrosite ? 'translate-x-4' : ''}`}></div>
+                        <div className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform ${site.wantMicrosite ? 'translate-x-4 shadow-sm' : ''}`}></div>
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-white">Enable Microsite</p>
-                        <p className="text-[11px] text-slate-400">Generate a beautiful website for your gym</p>
+                        <p className="text-sm font-bold text-white flex items-center gap-2">Enable Free Microsite <Sparkles size={14} className="text-yellow-400" /></p>
+                        <p className="text-[11px] text-slate-400 leading-relaxed">Turn your slug into a premium SEO-optimized website.</p>
                       </div>
                     </label>
                   </div>
 
-                  {site.wantMicrosite && (
-                    <div className="space-y-3 pt-2">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Choose Template</label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {[
-                        { id: "dark-forge", name: "Dark Forge", color: "from-slate-900 to-black", border: "border-slate-700" },
-                        { id: "neon-burn", name: "Neon Burn", color: "from-rose-950 to-black", border: "border-rose-900" },
-                        { id: "clean-fit", name: "Clean Fit", color: "from-slate-200 to-slate-400", border: "border-slate-300" },
-                      ].map(tpl => (
-                        <button
-                          key={tpl.id}
-                          type="button"
-                          onClick={() => setSite(p => ({ ...p, theme: tpl.id }))}
-                          className={`group relative overflow-hidden rounded-xl border-2 transition-all ${
-                            site.theme === tpl.id 
-                              ? "border-[#FF5C73] shadow-[0_0_15px_rgba(255,92,115,0.3)]" 
-                              : "border-white/10 hover:border-white/30"
-                          }`}
-                        >
-                          <div className={`aspect-[4/3] w-full bg-gradient-to-br ${tpl.color} relative`}>
-                            {/* Dummy preview skeleton */}
-                            <div className={`absolute inset-x-2 bottom-0 top-6 rounded-t-lg border-t border-l border-r ${tpl.border} bg-white/5 backdrop-blur-sm p-2 flex flex-col gap-1.5`}>
-                                <div className="h-1.5 w-8 bg-white/20 rounded-full" />
-                                <div className="h-3 w-3/4 bg-white/10 rounded" />
-                                <div className="h-1.5 w-1/2 bg-white/5 rounded" />
-                            </div>
-                          </div>
-                          <div className={`p-2 text-center text-[10px] font-bold uppercase tracking-wider ${
-                            site.theme === tpl.id ? "bg-[#FF5C73] text-white" : "bg-[#0A0A0A] text-slate-400"
-                          }`}>
-                            {tpl.name}
-                          </div>
-                          {site.theme === tpl.id && (
-                            <div className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF5C73] text-white shadow-sm">
-                              <CheckCircle2 size={10} />
-                            </div>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  )}
+                  <AnimatePresence>
+                    {site.wantMicrosite && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }} 
+                        animate={{ opacity: 1, height: 'auto' }} 
+                        exit={{ opacity: 0, height: 0 }}
+                        className="space-y-4 pt-2 overflow-hidden"
+                      >
+                        <div className="space-y-3">
+                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">About Your Gym</label>
+                          <textarea 
+                            name="about" 
+                            value={site.about} 
+                            onChange={(e) => setSite(p => ({ ...p, about: e.target.value }))}
+                            placeholder="We specialize in hypertrophy and functional training..."
+                            className="w-full bg-slate-900/50 border border-white/5 rounded-2xl p-4 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-[#FF5C73]/20 transition-all outline-none resize-none h-24 text-sm"
+                          />
+                        </div>
 
-                  {error && <p className="text-rose-500 text-xs font-semibold text-center bg-rose-500/10 py-2 rounded-lg border border-rose-500/20">{error}</p>}
+                        <div className="space-y-3">
+                          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Microsite Primary Color</label>
+                          <div className="grid grid-cols-4 gap-3">
+                            {[
+                              { id: "#ef4444", name: "Red", color: "bg-red-500" },
+                              { id: "#3b82f6", name: "Blue", color: "bg-blue-500" },
+                              { id: "#10b981", name: "Green", color: "bg-emerald-500" },
+                              { id: "#f59e0b", name: "Yellow", color: "bg-amber-500" },
+                              { id: "#8b5cf6", name: "Purple", color: "bg-violet-500" },
+                              { id: "#ec4899", name: "Orange", color: "bg-orange-500" },
+                              { id: "#ffffff", name: "White", color: "bg-white" },
+                              { id: "#cbd5e1", name: "Silver", color: "bg-slate-300" },
+                            ].map(tpl => (
+                              <button
+                                key={tpl.id}
+                                type="button"
+                                onClick={() => setSite(p => ({ ...p, theme: tpl.id }))}
+                                className={`group relative h-12 rounded-xl flex items-center justify-center transition-all ${tpl.color} ${
+                                  site.theme === tpl.id 
+                                    ? "ring-2 ring-white ring-offset-2 ring-offset-[#030612] scale-110 z-10 shadow-[0_0_20px_rgba(255,255,255,0.2)]" 
+                                    : "hover:scale-105 hover:shadow-lg opacity-80 hover:opacity-100"
+                                }`}
+                                title={tpl.name}
+                              >
+                                {site.theme === tpl.id && (
+                                  <div className={`h-4 w-4 rounded-full flex items-center justify-center ${tpl.id === '#ffffff' ? 'text-black' : 'text-white'}`}>
+                                    <CheckCircle2 size={12} strokeWidth={4} />
+                                  </div>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                  <div className="flex gap-3 pt-1">
+                  {error && <p className="text-rose-500 text-xs font-semibold text-center bg-rose-500/10 py-2 rounded-lg border border-rose-500/20 mt-4">{error}</p>}
+
+                  <div className="flex gap-3 pt-4 border-t border-white/5 mt-6">
                     <button type="button" onClick={() => { setStep(STEP_USER); setError(null); }}
-                      className="flex items-center gap-2 px-5 py-3.5 rounded-2xl border border-white/10 text-slate-400 font-bold text-sm hover:border-white/20 hover:text-white transition-all">
+                      className="flex items-center gap-2 px-5 py-4 rounded-2xl bg-white/5 text-white font-bold text-sm hover:bg-white/10 transition-all">
                       <ArrowLeft size={16} /> Back
                     </button>
                     <StarBorder type="button" onClick={goToStep3} disabled={!site.gymName || !site.username || !site.location || usernameAvailable === false}
-                      className="flex-1 py-4 rounded-2xl" color="#FF5C73">
+                      className="flex-1 py-4 rounded-2xl shadow-xl shadow-[#FF5C73]/10" color="#FF5C73">
                       <span className="flex items-center justify-center gap-2 text-base font-black">
-                        Next: Payment <ArrowRight size={18} />
+                        Choose Plan <ArrowRight size={18} />
                       </span>
                     </StarBorder>
                   </div>
@@ -699,77 +699,129 @@ export default function SignupPage() {
                 <h2 className="text-lg font-black text-white mb-6 flex items-center gap-2"><CreditCard size={20} className="text-[#FF5C73]" /> Choose Your Plan</h2>
 
                 <div className="flex justify-center mb-6">
-                  <div className="bg-white/5 p-1 rounded-xl border border-white/10 flex items-center">
+                  <div className="bg-white/5 p-1 rounded-xl border border-white/10 flex items-center relative overflow-hidden">
+                    {/* Animated Tab Background */}
+                    <div
+                      className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-lg transition-transform duration-300 shadow-sm ${
+                        billingPeriod === "monthly" ? "left-1" : "translate-x-[calc(100%+6px)]"
+                      }`}
+                    />
                     <button
                       onClick={() => setBillingPeriod("monthly")}
-                      className={`px-6 py-2 rounded-lg font-bold text-xs transition-all ${
-                        billingPeriod === "monthly" ? "bg-white text-black" : "text-slate-500 hover:text-white"
+                      className={`relative z-10 px-6 py-2 rounded-lg font-bold text-xs transition-colors ${
+                        billingPeriod === "monthly" ? "text-black" : "text-slate-400 hover:text-white"
                       }`}
                     >
                       Monthly
                     </button>
                     <button
                       onClick={() => setBillingPeriod("yearly")}
-                      className={`px-6 py-2 rounded-lg font-bold text-xs transition-all ${
-                        billingPeriod === "yearly" ? "bg-white text-black" : "text-slate-500 hover:text-white"
+                      className={`relative z-10 px-6 py-2 rounded-lg font-bold text-xs transition-colors flex items-center gap-1.5 ${
+                        billingPeriod === "yearly" ? "text-black" : "text-slate-400 hover:text-white"
                       }`}
                     >
-                      Yearly
+                      Yearly <span className="bg-emerald-500/20 text-emerald-500 text-[9px] px-1.5 py-0.5 rounded shadow-sm">-20%</span>
                     </button>
                   </div>
                 </div>
 
-                <div className="space-y-3 mb-6">
+                <div className="space-y-3">
                   {displayPlans.map(p => (
                     <button key={p.id} type="button" onClick={() => setSelectedPlan(p.id)}
-                      className={`w-full text-left p-4 rounded-2xl border transition-all ${
+                      className={`w-full text-left p-4 rounded-2xl border-2 transition-all relative overflow-hidden group ${
                         selectedPlan === p.id
-                          ? "border-[#FF5C73] bg-[#FF5C73]/10 shadow-[0_0_20px_rgba(255,92,115,0.1)]"
-                          : "border-white/8 bg-white/3 hover:border-white/20"
+                          ? "border-[#FF5C73] bg-[#FF5C73]/5 shadow-[0_0_20px_rgba(255,92,115,0.15)]"
+                          : "border-white/5 bg-black/20 hover:border-white/20 hover:bg-white/5"
                       }`}>
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between relative z-10">
                         <div>
-                          <p className="font-black text-white text-sm">{p.name}</p>
-                          <p className="text-slate-500 text-xs mt-0.5">{p.desc}</p>
+                          <p className="font-black text-white text-sm flex items-center gap-2">
+                            {p.name}
+                            {selectedPlan === p.id && <CheckCircle2 className="text-[#FF5C73]" size={14} />}
+                          </p>
+                          <p className="text-slate-400 text-xs mt-1">{p.desc}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-black text-white">{p.price}</p>
-                          <p className="text-[10px] text-slate-600 uppercase font-black tracking-widest">
-                            {p.id === "plan-free" ? "" : billingPeriod === "yearly" ? "Billed Yearly" : "Monthly"}
-                          </p>
-                          {selectedPlan === p.id && <CheckCircle2 size={16} className="text-[#FF5C73] ml-auto mt-1" />}
+                          <p className="font-black text-white text-lg">{p.price}</p>
+                          {p.id !== "plan-free" && selectedPlan === p.id && billingPeriod === "yearly" && (
+                             <p className="text-[9px] text-emerald-400 uppercase font-black tracking-widest bg-emerald-500/10 px-1 inline-block rounded">
+                               SAVE 20%
+                             </p>
+                          )}
                         </div>
                       </div>
                     </button>
                   ))}
                 </div>
 
-                {error && <p className="text-rose-500 text-xs font-semibold text-center bg-rose-500/10 py-2 rounded-lg border border-rose-500/20 mb-4">{error}</p>}
+                {/* Coupon Code Section */}
+                {selectedPlan !== 'plan-free' && (
+                  <div className="mt-6 p-4 rounded-2xl border border-white/10 bg-white/5 relative z-10">
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                      Promo Code <Tag size={12} className="text-[#FF5C73]" />
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        value={couponCode || ''}
+                        onChange={(e) => {
+                          setCouponCode(e.target.value.toUpperCase());
+                          setCouponStatus(null);
+                        }}
+                        placeholder="e.g. FIT2024"
+                        className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-bold placeholder:text-slate-500 focus:border-[#FF5C73]/50 focus:ring-1 focus:ring-[#FF5C73]/50 transition-all outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // Dummy validation
+                          if(couponCode && couponCode.length > 3) {
+                            setCouponStatus({ valid: true, message: "Coupon applied! 15% Off." });
+                          } else {
+                            setCouponStatus({ valid: false, message: "Invalid promo code." });
+                          }
+                        }}
+                        disabled={!couponCode}
+                        className="bg-white/10 hover:bg-white/20 text-white px-5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                    {couponStatus && (
+                      <p className={`text-[10px] font-bold mt-2 ml-1 flex items-center gap-1 ${couponStatus.valid ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {couponStatus.valid ? <CheckCircle2 size={10} /> : <ShieldAlert size={10} />}
+                        {couponStatus.message}
+                      </p>
+                    )}
+                  </div>
+                )}
 
-                <div className="flex gap-3">
-                  <button type="button" onClick={() => { setStep(STEP_SITE); setError(null); }}
-                    className="flex items-center gap-2 px-5 py-3.5 rounded-2xl border border-white/10 text-slate-400 font-bold text-sm hover:border-white/20 hover:text-white transition-all">
-                    <ArrowLeft size={16} /> Back
-                  </button>
-
-                  {selectedPlan === "plan-free" ? (
-                    <StarBorder type="button" onClick={handleFreeSignup} disabled={registering} className="flex-1 py-4 rounded-2xl" color="#FF5C73">
-                      <span className="flex items-center justify-center gap-2 text-base font-black">
-                        {registering ? <Loader2 className="animate-spin" size={18} /> : <><Sparkles size={18} /> Start Free</>}
-                      </span>
-                    </StarBorder>
-                  ) : (
-                    <StarBorder type="button" onClick={handlePay} disabled={paying || registering} className="flex-1 py-4 rounded-2xl" color="#FF5C73">
-                      <span className="flex items-center justify-center gap-2 text-base font-black">
-                        {paying || registering ? <Loader2 className="animate-spin" size={18} /> : <><CreditCard size={18} /> Pay with Razorpay</>}
-                      </span>
-                    </StarBorder>
-                  )}
+                <div className="bg-gradient-to-r from-emerald-500/10 to-transparent p-4 rounded-2xl border border-emerald-500/20 flex items-center gap-4 mt-6">
+                  <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center shrink-0">
+                    <Zap className="text-emerald-500" size={20} />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-0.5">Instant Setup</p>
+                    <p className="text-[11px] text-slate-300 leading-relaxed">Your dashboard and <span className="font-bold text-emerald-300">{site.username}.gmmx.app</span> will be ready instantly.</p>
+                  </div>
                 </div>
 
-                <p className="text-center text-slate-600 text-[11px] mt-4 flex items-center justify-center gap-1">
-                  <ShieldCheck size={12} /> Secured by Razorpay. Cancel anytime.
-                </p>
+                {error && <p className="text-rose-500 text-xs font-semibold text-center bg-rose-500/10 py-2 rounded-lg border border-rose-500/20 my-4">{error}</p>}
+
+                <div className="flex gap-3 pt-6 border-t border-white/5 mt-6">
+                  <button type="button" onClick={() => { setStep(STEP_SITE); setError(null); }}
+                    className="flex items-center gap-2 px-5 py-4 rounded-2xl bg-white/5 text-white font-bold text-sm hover:bg-white/10 transition-all">
+                    <ArrowLeft size={16} /> Back
+                  </button>
+                  <button type="button" onClick={handleFinalSubmit} disabled={registering || paying}
+                    className="flex-1 py-4 bg-[#FF5C73] text-white rounded-2xl font-black text-base hover:bg-[#FF5C73]/90 transition-all disabled:opacity-50 shadow-[0_0_20px_rgba(255,92,115,0.3)] shadow-[#FF5C73]/20 relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform" />
+                    <span className="relative flex items-center justify-center gap-2">
+                      {registering || paying ? <Loader2 className="animate-spin" size={18} /> : 
+                        selectedPlan === 'plan-free' ? "Complete Registration" : "Secure Checkout"
+                      }
+                    </span>
+                  </button>
+                </div>
               </motion.div>
             )}
 
@@ -810,6 +862,67 @@ export default function SignupPage() {
           </button>
         </p>
       </div>
+      
+      {/* OTP Modal */}
+      <AnimatePresence>
+        {showOtpModal && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#030612]/90 backdrop-blur-md"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white/5 border border-white/10 p-6 sm:p-8 rounded-[32px] w-full max-w-[400px] shadow-2xl relative overflow-hidden backdrop-blur-xl"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#FF5C73] to-transparent opacity-50" />
+              <button 
+                onClick={() => setShowOtpModal(false)}
+                className="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors"
+              >
+                ✕
+              </button>
+              
+              <div className="mb-8 relative">
+                <div className="w-16 h-16 bg-[#FF5C73]/10 border border-[#FF5C73]/20 rounded-2xl flex items-center justify-center mb-6">
+                  <Mail className="text-[#FF5C73]" size={28} />
+                </div>
+                <h3 className="text-2xl font-black text-white mb-2 tracking-tight">Verify email</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  We've sent a 6-digit code to <br/>
+                  <span className="font-bold text-white bg-white/5 py-1 px-2 rounded-md mt-1 inline-block">{user.email}</span>
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <input maxLength={6} value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
+                    placeholder="0 0 0 0 0 0"
+                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-white text-center font-black text-3xl tracking-[0.3em] outline-none focus:border-[#FF5C73]/50 focus:ring-1 focus:ring-[#FF5C73]/50 transition-all font-mono" />
+                  
+                  <button type="button" onClick={verifyOtp} disabled={verifying || otp.length < 6}
+                    className="w-full bg-[#FF5C73] text-white py-4 rounded-2xl font-black text-sm hover:bg-[#FF5C73]/90 transition-all disabled:opacity-50 flex justify-center items-center gap-2">
+                    {verifying ? <Loader2 className="animate-spin" size={18} /> : <span>Verify Code <ArrowRight size={16} /></span>}
+                  </button>
+                </div>
+                
+                {error && <p className="text-rose-500 text-xs font-semibold text-center bg-rose-500/10 py-2 rounded-lg border border-rose-500/20">{error}</p>}
+                
+                <p className="text-xs text-slate-500 text-center">
+                  Didn't get the code?{" "}
+                  <button type="button" disabled={sending} onClick={() => { setOtpSent(false); sendOtp(); }} className="text-[#FF5C73] hover:text-[#FF5C73]/80 hover:underline font-bold transition-colors">
+                    {sending ? "Resending..." : "Click to resend"}
+                  </button>
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </main>
   );
 }
