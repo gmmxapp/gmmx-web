@@ -143,7 +143,7 @@ export default function SignupPage() {
 
   // ── Step 3 state ──────────────────────────────────────────────────────────
   const [selectedPlan, setSelectedPlan] = useState<string>("plan-growth-monthly");
-  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "3months" | "6months" | "yearly">("monthly");
   const [paying,       setPaying]       = useState(false);
   const [registering,  setRegistering]  = useState(false);
   const [couponCode, setCouponCode] = useState("");
@@ -350,7 +350,11 @@ export default function SignupPage() {
       const r = await fetch("/api/payment/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId: selectedPlan }),
+        body: JSON.stringify({ 
+          planId: selectedPlan,
+          couponCode: couponCode,
+          wantMicrosite: site.wantMicrosite
+        }),
       });
       if (!r.ok) throw new Error("Could not create order");
       const payload = await r.json() as { orderId: string; amountInPaise: number; currency: string; keyId: string };
@@ -419,11 +423,45 @@ export default function SignupPage() {
 
   // ─── Plans for Step 3 ─────────────────────────────────────────────────────
   const displayPlans = [
-    { id: "plan-free",   name: "Always Free",  price: "₹0",    desc: "Core attendance, 25 members", period: "both" },
-    { id: `plan-starter-${billingPeriod}`, name: "Starter",  price: billingPeriod === "monthly" ? "₹499/mo" : "₹399/mo", desc: "100 members, QR scan, reports", period: billingPeriod },
-    { id: `plan-growth-${billingPeriod}`, name: "Growth",   price: billingPeriod === "monthly" ? "₹999/mo" : "₹799/mo", desc: "300 members, WhatsApp, microsite", period: billingPeriod },
-    { id: `plan-scale-${billingPeriod}`, name: "Scale",    price: billingPeriod === "monthly" ? "₹1499/mo" : "₹1199/mo", desc: "Unlimited, multi-branch, VIP support", period: billingPeriod },
+    { id: "plan-free", name: "Always Free", price: 0, displayPrice: "₹0", desc: "Core attendance, 25 members", period: "both" },
+    { id: `plan-starter-${billingPeriod}`, name: "Starter", 
+      price: billingPeriod === "monthly" ? 499 : billingPeriod === "3months" ? 449 : billingPeriod === "6months" ? 424 : 399, 
+      displayPrice: billingPeriod === "monthly" ? "₹499/mo" : billingPeriod === "3months" ? "₹449/mo" : billingPeriod === "6months" ? "₹424/mo" : "₹399/mo", 
+      desc: "100 members, QR scan, reports", period: billingPeriod },
+    { id: `plan-growth-${billingPeriod}`, name: "Growth", 
+      price: billingPeriod === "monthly" ? 999 : billingPeriod === "3months" ? 899 : billingPeriod === "6months" ? 849 : 799, 
+      displayPrice: billingPeriod === "monthly" ? "₹999/mo" : billingPeriod === "3months" ? "₹899/mo" : billingPeriod === "6months" ? "₹849/mo" : "₹799/mo", 
+      desc: "300 members, WhatsApp, microsite", period: billingPeriod },
+    { id: `plan-scale-${billingPeriod}`, name: "Scale", 
+      price: billingPeriod === "monthly" ? 1499 : billingPeriod === "3months" ? 1349 : billingPeriod === "6months" ? 1274 : 1199, 
+      displayPrice: billingPeriod === "monthly" ? "₹1499/mo" : billingPeriod === "3months" ? "₹1349/mo" : billingPeriod === "6months" ? "₹1274/mo" : "₹1199/mo", 
+      desc: "Unlimited, multi-branch, VIP support", period: billingPeriod },
   ];
+
+  const calculateTotal = () => {
+    const plan = displayPlans.find(p => p.id === selectedPlan);
+    if (!plan) return 0;
+    
+    const months = billingPeriod === "3months" ? 3 : billingPeriod === "6months" ? 6 : billingPeriod === "yearly" ? 12 : 1;
+    let total = plan.price * months;
+    
+    const isStarter = selectedPlan.startsWith("plan-starter");
+    const isCouponActive = couponStatus?.valid && couponCode === "WELCOMEGMMX";
+    
+    if (isCouponActive && isStarter) {
+      total = 4;
+    } else if (couponStatus?.valid) {
+      total = Math.round(total * 0.85); // 15% off for other coupons
+    }
+
+    // Add microsite fee if selected
+    if (site.wantMicrosite) {
+      const micrositeFee = (isCouponActive && isStarter) ? 0 : 199;
+      total += micrositeFee;
+    }
+    
+    return total;
+  };
 
   return (
     <main className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 overflow-hidden bg-[#030612]">
@@ -700,27 +738,37 @@ export default function SignupPage() {
 
                 <div className="flex justify-center mb-6">
                   <div className="bg-white/5 p-1 rounded-xl border border-white/10 flex items-center relative overflow-hidden">
-                    {/* Animated Tab Background */}
-                    <div
-                      className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-lg transition-transform duration-300 shadow-sm ${
-                        billingPeriod === "monthly" ? "left-1" : "translate-x-[calc(100%+6px)]"
-                      }`}
-                    />
                     <button
                       onClick={() => setBillingPeriod("monthly")}
-                      className={`relative z-10 px-6 py-2 rounded-lg font-bold text-xs transition-colors ${
-                        billingPeriod === "monthly" ? "text-black" : "text-slate-400 hover:text-white"
+                      className={`relative z-10 px-4 py-2 rounded-lg font-bold text-[10px] transition-colors ${
+                        billingPeriod === "monthly" ? "bg-white text-black shadow-sm" : "text-slate-400 hover:text-white"
                       }`}
                     >
                       Monthly
                     </button>
                     <button
-                      onClick={() => setBillingPeriod("yearly")}
-                      className={`relative z-10 px-6 py-2 rounded-lg font-bold text-xs transition-colors flex items-center gap-1.5 ${
-                        billingPeriod === "yearly" ? "text-black" : "text-slate-400 hover:text-white"
+                      onClick={() => setBillingPeriod("3months")}
+                      className={`relative z-10 px-4 py-2 rounded-lg font-bold text-[10px] transition-colors ${
+                        billingPeriod === "3months" ? "bg-white text-black shadow-sm" : "text-slate-400 hover:text-white"
                       }`}
                     >
-                      Yearly <span className="bg-emerald-500/20 text-emerald-500 text-[9px] px-1.5 py-0.5 rounded shadow-sm">-20%</span>
+                      Quarterly <span className="text-[8px] text-emerald-500 ml-0.5">-10%</span>
+                    </button>
+                    <button
+                      onClick={() => setBillingPeriod("6months")}
+                      className={`relative z-10 px-4 py-2 rounded-lg font-bold text-[10px] transition-colors ${
+                        billingPeriod === "6months" ? "bg-white text-black shadow-sm" : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      6M <span className="text-[8px] text-emerald-500 ml-0.5">-15%</span>
+                    </button>
+                    <button
+                      onClick={() => setBillingPeriod("yearly")}
+                      className={`relative z-10 px-4 py-2 rounded-lg font-bold text-[10px] transition-colors flex items-center gap-1 ${
+                        billingPeriod === "yearly" ? "bg-white text-black shadow-sm" : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      Yearly <span className="text-[8px] text-emerald-500 ml-0.5">-20%</span>
                     </button>
                   </div>
                 </div>
@@ -773,9 +821,10 @@ export default function SignupPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          // Dummy validation
-                          if(couponCode && couponCode.length > 3) {
-                            setCouponStatus({ valid: true, message: "Coupon applied! 15% Off." });
+                          if (couponCode === "WELCOMEGMMX" && selectedPlan.startsWith("plan-starter")) {
+                            setCouponStatus({ valid: true, message: "Coupon applied! Starter plan is ₹4 and Microsite is FREE." });
+                          } else if (couponCode && couponCode.length > 3) {
+                            setCouponStatus({ valid: true, message: "Coupon applied! 15% discount." });
                           } else {
                             setCouponStatus({ valid: false, message: "Invalid promo code." });
                           }
@@ -795,13 +844,37 @@ export default function SignupPage() {
                   </div>
                 )}
 
-                <div className="bg-gradient-to-r from-emerald-500/10 to-transparent p-4 rounded-2xl border border-emerald-500/20 flex items-center gap-4 mt-6">
-                  <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center shrink-0">
-                    <Zap className="text-emerald-500" size={20} />
+                <div className="bg-gradient-to-r from-emerald-500/10 to-transparent p-4 rounded-2xl border border-emerald-500/20 flex flex-col gap-3 mt-6">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-slate-400 font-bold">Plan Price ({billingPeriod})</p>
+                    <p className="text-xs text-white font-black">
+                      {displayPlans.find(p => p.id === selectedPlan)?.displayPrice}
+                      {billingPeriod !== "monthly" && (
+                        <span className="text-[10px] text-slate-500 ml-1">
+                          x {billingPeriod === "3months" ? 3 : billingPeriod === "6months" ? 6 : 12}
+                        </span>
+                      )}
+                    </p>
                   </div>
-                  <div>
-                    <p className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-0.5">Instant Setup</p>
-                    <p className="text-[11px] text-slate-300 leading-relaxed">Your dashboard and <span className="font-bold text-emerald-300">{site.username}.gmmx.app</span> will be ready instantly.</p>
+                  {site.wantMicrosite && (
+                    <div className="flex items-center justify-between border-t border-white/5 pt-2">
+                      <p className="text-xs text-slate-400 font-bold">Microsite Setup (One-time)</p>
+                      <p className={`text-xs font-black ${couponStatus?.valid && couponCode === "WELCOMEGMMX" && selectedPlan.startsWith("plan-starter") ? "text-emerald-400" : "text-white"}`}>
+                        {couponStatus?.valid && couponCode === "WELCOMEGMMX" && selectedPlan.startsWith("plan-starter") ? "FREE" : "₹199"}
+                      </p>
+                    </div>
+                  )}
+                  {couponStatus?.valid && (
+                    <div className="flex items-center justify-between border-t border-white/5 pt-2">
+                      <p className="text-xs text-emerald-400 font-bold">Coupon Applied</p>
+                      <p className="text-xs text-emerald-400 font-black">
+                        {couponCode === "WELCOMEGMMX" && selectedPlan.startsWith("plan-starter") ? "Promotion Discount" : "15% Off"}
+                      </p>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between border-t border-white/10 pt-3 mt-1">
+                    <p className="text-sm text-white font-black uppercase tracking-wider">Total Amount</p>
+                    <p className="text-xl text-[#FF5C73] font-black tracking-tighter">₹{calculateTotal()}</p>
                   </div>
                 </div>
 

@@ -4,7 +4,11 @@ import { getPlanById } from "@/lib/plans";
 
 export async function POST(request: Request) {
   try {
-    const { planId } = (await request.json()) as { planId?: string };
+    const { planId, couponCode, wantMicrosite } = (await request.json()) as { 
+      planId?: string;
+      couponCode?: string;
+      wantMicrosite?: boolean;
+    };
 
     if (!planId) {
       return NextResponse.json({ error: "planId is required" }, { status: 400 });
@@ -15,15 +19,31 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unknown plan" }, { status: 404 });
     }
 
+    // Calculate dynamic amount
+    let amountInPaise = plan.amountInPaise;
+    const isStarter = planId.startsWith("plan-starter");
+    const isWelcomeCoupon = couponCode === "WELCOMEGMMX";
+
+    if (isWelcomeCoupon && isStarter) {
+      amountInPaise = 400; // ₹4
+    } else if (couponCode && couponCode.length > 3) {
+      amountInPaise = Math.round(amountInPaise * 0.85); // 15% discount
+    }
+
+    if (wantMicrosite) {
+      const micrositeFee = (isWelcomeCoupon && isStarter) ? 0 : 19900;
+      amountInPaise += micrositeFee;
+    }
+
     const order = await createRazorpayOrder({
-      amountInPaise: plan.amountInPaise,
+      amountInPaise,
       currency: plan.currency,
       receipt: `gmmx_${plan.id}_${Date.now()}`,
       notes: {
         planId: plan.id,
-        planType: plan.type,
-        planName: plan.name,
-        recurringAmountInPaise: String(plan.recurringAmountInPaise ?? 0)
+        couponCode: couponCode || "",
+        wantMicrosite: String(!!wantMicrosite),
+        originalAmountInPaise: String(plan.amountInPaise)
       }
     });
 

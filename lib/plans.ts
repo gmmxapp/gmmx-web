@@ -1,4 +1,4 @@
-export type PlanType = "saas-monthly" | "saas-yearly" | "saas-free" | "website-package";
+export type PlanType = "saas-monthly" | "saas-3months" | "saas-6months" | "saas-yearly" | "saas-free" | "website-package";
 
 export type PlanDefinition = {
   id: string;
@@ -42,13 +42,7 @@ export const saasPlans: PlanDefinition[] = [
     amountInPaise: 49900,
     currency: "INR",
     ctaLabel: "Start Free Trial",
-    features: [
-      "Up to 100 members",
-      "QR scan attendance",
-      "Fee payment tracking",
-      "Manual fee reminders",
-      "Basic business reports"
-    ]
+    features: ["Up to 100 members", "QR scan attendance", "Fee tracking", "Reports"]
   },
   {
     id: "plan-growth-monthly",
@@ -60,14 +54,7 @@ export const saasPlans: PlanDefinition[] = [
     currency: "INR",
     ctaLabel: "Start Free Trial",
     isPopular: true,
-    features: [
-      "Up to 300 members",
-      "WhatsApp automation",
-      "Automated fee alerts",
-      "Trainer management",
-      "Custom gym microsite",
-      "Advanced CRM tools"
-    ]
+    features: ["Up to 300 members", "WhatsApp automation", "Microsite", "Advanced CRM"]
   },
   {
     id: "plan-scale-monthly",
@@ -78,14 +65,77 @@ export const saasPlans: PlanDefinition[] = [
     amountInPaise: 149900,
     currency: "INR",
     ctaLabel: "Start Free Trial",
-    features: [
-      "Unlimited members",
-      "Full business automation",
-      "White-label microsite",
-      "Multi-branch support",
-      "Advanced API access",
-      "24/7 VIP support"
-    ]
+    features: ["Unlimited members", "Full automation", "Multi-branch", "VIP support"]
+  },
+  // ─── 3 MONTHS PLANS ─────────────────────────────────────────────────────────
+  {
+    id: "plan-starter-3months",
+    type: "saas-3months",
+    name: "Starter",
+    badge: "3 Months",
+    description: "Quarterly plan with 10% savings.",
+    amountInPaise: 44900 * 3,
+    currency: "INR",
+    ctaLabel: "Get Started",
+    features: ["Up to 100 members", "10% Discount included"]
+  },
+  {
+    id: "plan-growth-3months",
+    type: "saas-3months",
+    name: "Growth",
+    badge: "3 Months",
+    description: "Quarterly growth plan for serious gyms.",
+    amountInPaise: 89900 * 3,
+    currency: "INR",
+    ctaLabel: "Get Started",
+    isPopular: true,
+    features: ["Up to 300 members", "10% Discount included"]
+  },
+  {
+    id: "plan-scale-3months",
+    type: "saas-3months",
+    name: "Scale",
+    badge: "3 Months",
+    description: "Quarterly scale plan for elite gyms.",
+    amountInPaise: 134900 * 3,
+    currency: "INR",
+    ctaLabel: "Get Started",
+    features: ["Unlimited members", "10% Discount included"]
+  },
+  // ─── 6 MONTHS PLANS ─────────────────────────────────────────────────────────
+  {
+    id: "plan-starter-6months",
+    type: "saas-6months",
+    name: "Starter",
+    badge: "6 Months",
+    description: "Half-yearly plan with 15% savings.",
+    amountInPaise: 42400 * 6,
+    currency: "INR",
+    ctaLabel: "Get Started",
+    features: ["Up to 100 members", "15% Discount included"]
+  },
+  {
+    id: "plan-growth-6months",
+    type: "saas-6months",
+    name: "Growth",
+    badge: "6 Months",
+    description: "Half-yearly growth plan for scaling gyms.",
+    amountInPaise: 84900 * 6,
+    currency: "INR",
+    ctaLabel: "Get Started",
+    isPopular: true,
+    features: ["Up to 300 members", "15% Discount included"]
+  },
+  {
+    id: "plan-scale-6months",
+    type: "saas-6months",
+    name: "Scale",
+    badge: "6 Months",
+    description: "Half-yearly scale plan for elite operations.",
+    amountInPaise: 127400 * 6,
+    currency: "INR",
+    ctaLabel: "Get Started",
+    features: ["Unlimited members", "15% Discount included"]
   },
   // ─── YEARLY PLANS ───────────────────────────────────────────────────────────
   {
@@ -93,15 +143,11 @@ export const saasPlans: PlanDefinition[] = [
     type: "saas-yearly",
     name: "Starter",
     badge: "Yearly",
-    description: "Annual plan for consistent growing professional gyms.",
-    amountInPaise: 39900 * 12, // 399 * 12
+    description: "Annual plan for consistent gyms with 20% savings.",
+    amountInPaise: 39900 * 12,
     currency: "INR",
-    ctaLabel: "Start Free Trial",
-    features: [
-      "Up to 100 members",
-      "Everything in Monthly",
-      "Priority onboarding"
-    ]
+    ctaLabel: "Get Started",
+    features: ["Up to 100 members", "20% Discount included"]
   },
   {
     id: "plan-growth-yearly",
@@ -109,30 +155,22 @@ export const saasPlans: PlanDefinition[] = [
     name: "Growth",
     badge: "Yearly",
     description: "Best value for scaling fast with annual commitment.",
-    amountInPaise: 79900 * 12, // 799 * 12
+    amountInPaise: 79900 * 12,
     currency: "INR",
-    ctaLabel: "Start Free Trial",
+    ctaLabel: "Get Started",
     isPopular: true,
-    features: [
-      "Up to 300 members",
-      "Everything in Monthly",
-      "20% Discount included"
-    ]
+    features: ["Up to 300 members", "20% Discount included"]
   },
   {
     id: "plan-scale-yearly",
     type: "saas-yearly",
     name: "Scale",
     badge: "Yearly",
-    description: "Full OS with the best annual rate for multi-branch ops.",
-    amountInPaise: 119900 * 12, // 1199 * 12
+    description: "Full OS with the best annual rate.",
+    amountInPaise: 119900 * 12,
     currency: "INR",
-    ctaLabel: "Start Free Trial",
-    features: [
-      "Unlimited members",
-      "Everything in Monthly",
-      "Dedicated account manager"
-    ]
+    ctaLabel: "Get Started",
+    features: ["Unlimited members", "20% Discount included"]
   }
 ];
 

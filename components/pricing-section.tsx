@@ -11,8 +11,8 @@ const pricingPlans = [
   {
     id: "plan-free",
     name: "Free",
-    price: { monthly: 0, yearly: 0 },
-    displayPrice: { monthly: "₹0", yearly: "₹0" },
+    price: { monthly: 0, "3months": 0, "6months": 0, yearly: 0 },
+    displayPrice: { monthly: "₹0", "3months": "₹0", "6months": "₹0", yearly: "₹0" },
     description: "Perfect for trainers and small pilots just getting started.",
     features: [
       "Up to 25 members",
@@ -28,8 +28,8 @@ const pricingPlans = [
   {
     id: "plan-starter",
     name: "Starter",
-    price: { monthly: 499, yearly: 399 },
-    displayPrice: { monthly: "₹499", yearly: "₹399" },
+    price: { monthly: 499, "3months": 449, "6months": 424, yearly: 399 },
+    displayPrice: { monthly: "₹499", "3months": "₹449", "6months": "₹424", yearly: "₹399" },
     description: "The essential toolkit for growing professional gyms.",
     features: [
       "Up to 100 members",
@@ -45,8 +45,8 @@ const pricingPlans = [
   {
     id: "plan-growth",
     name: "Growth",
-    price: { monthly: 999, yearly: 799 },
-    displayPrice: { monthly: "₹999", yearly: "₹799" },
+    price: { monthly: 999, "3months": 899, "6months": 849, yearly: 799 },
+    displayPrice: { monthly: "₹999", "3months": "₹899", "6months": "₹849", yearly: "₹799" },
     description: "Our most popular plan for serious gym owners scaling fast.",
     features: [
       "Up to 300 members",
@@ -63,8 +63,8 @@ const pricingPlans = [
   {
     id: "plan-scale",
     name: "Scale",
-    price: { monthly: 1499, yearly: 1199 },
-    displayPrice: { monthly: "₹1499", yearly: "₹1199" },
+    price: { monthly: 1499, "3months": 1349, "6months": 1274, yearly: 1199 },
+    displayPrice: { monthly: "₹1499", "3months": "₹1349", "6months": "₹1274", yearly: "₹1199" },
     description: "The complete OS for elite gyms and multi-branch operations.",
     features: [
       "Unlimited members",
@@ -81,7 +81,7 @@ const pricingPlans = [
 ];
 
 export function PricingSection() {
-  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "3months" | "6months" | "yearly">("monthly");
 
   return (
     <section id="pricing" className="scroll-mt-24 pb-32 pt-20 font-pjs">
@@ -98,24 +98,40 @@ export function PricingSection() {
           </p>
           
           <div className="mt-14 flex justify-center">
-            <div className="bg-white/5 p-1.5 rounded-2xl border border-white/10 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] inline-flex items-center">
+            <div className="bg-white/5 p-1.5 rounded-2xl border border-white/10 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] inline-flex flex-wrap items-center justify-center">
               <button
                 onClick={() => setBillingPeriod("monthly")}
-                className={`px-10 py-3.5 rounded-xl font-bold text-sm transition-all duration-500 ease-out ${
+                className={`px-6 py-3 rounded-xl font-bold text-xs transition-all duration-300 ${
                   billingPeriod === "monthly" ? "bg-white text-black shadow-xl" : "text-slate-500 hover:text-white"
                 }`}
               >
                 Monthly
               </button>
               <button
+                onClick={() => setBillingPeriod("3months")}
+                className={`px-6 py-3 rounded-xl font-bold text-xs transition-all duration-300 ${
+                  billingPeriod === "3months" ? "bg-white text-black shadow-xl" : "text-slate-500 hover:text-white"
+                }`}
+              >
+                3 Months <span className="text-[9px] text-emerald-500 ml-1">-10%</span>
+              </button>
+              <button
+                onClick={() => setBillingPeriod("6months")}
+                className={`px-6 py-3 rounded-xl font-bold text-xs transition-all duration-300 ${
+                  billingPeriod === "6months" ? "bg-white text-black shadow-xl" : "text-slate-500 hover:text-white"
+                }`}
+              >
+                6 Months <span className="text-[9px] text-emerald-500 ml-1">-15%</span>
+              </button>
+              <button
                 onClick={() => setBillingPeriod("yearly")}
-                className={`px-10 py-3.5 rounded-xl font-bold text-sm transition-all duration-500 ease-out relative ${
+                className={`px-6 py-3 rounded-xl font-bold text-xs transition-all duration-300 relative ${
                   billingPeriod === "yearly" ? "bg-white text-black shadow-xl" : "text-slate-500 hover:text-white"
                 }`}
               >
                 Yearly
-                <span className="absolute -top-5 -right-5 bg-gradient-to-br from-[#FF5C73] to-[#ff3b56] text-white text-[10px] px-3 py-1.5 rounded-full font-black shadow-2xl border-4 border-[#05050A] animate-bounce">
-                  -20% OFF
+                <span className="absolute -top-4 -right-4 bg-gradient-to-br from-[#FF5C73] to-[#ff3b56] text-white text-[8px] px-2 py-1 rounded-full font-black shadow-2xl border-2 border-[#05050A]">
+                  -20%
                 </span>
               </button>
             </div>
