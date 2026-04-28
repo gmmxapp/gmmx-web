@@ -134,6 +134,54 @@ export function createTrainer(payload: CreateUserPayload) {
   });
 }
 
+export function fetchMembershipPlans() {
+  return apiFetch<any[]>("/api/membership-plans").then((res: any) => (res as any).data);
+}
+
+export function createMembershipPlan(payload: any) {
+  return apiFetch("/api/membership-plans", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+export function updateMembershipPlan(id: string, payload: any) {
+  return apiFetch(`/api/membership-plans/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload)
+  });
+}
+
+export function deleteMembershipPlan(id: string) {
+  return apiFetch(`/api/membership-plans/${id}`, {
+    method: "DELETE"
+  });
+}
+
+export function fetchEquipment() {
+  return apiFetch<any[]>("/api/equipment").then((res: any) => (res as any).data);
+}
+
+export function createEquipment(payload: any) {
+  return apiFetch("/api/equipment", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+export function updateEquipment(id: string, payload: any) {
+  return apiFetch(`/api/equipment/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload)
+  });
+}
+
+export function deleteEquipment(id: string) {
+  return apiFetch(`/api/equipment/${id}`, {
+    method: "DELETE"
+  });
+}
+
 export type DashboardSummary = {
   tenantSlug: string;
   activeMembers: number;

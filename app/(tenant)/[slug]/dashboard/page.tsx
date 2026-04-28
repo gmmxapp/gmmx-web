@@ -8,6 +8,7 @@ import {
   DashboardSummary,
   fetchDashboardSummary
 } from "@/lib/api";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const params = useParams<{ slug: string }>();
@@ -100,13 +101,17 @@ export default function DashboardPage() {
           <button className="button" type="submit" style={{ marginTop: 12 }}>Add Member</button>
         </form>
 
-        <form className="card form-stack" onSubmit={(e) => addUser(e, "trainer")}>
-          <h3>Add Trainer</h3>
-          <input className="input" name="fullName" placeholder="Name" required />
-          <input className="input" name="mobile" placeholder="Mobile" pattern="[0-9]{10}" required />
-          <input className="input" name="email" placeholder="Email" type="email" />
-          <button className="button" type="submit" style={{ marginTop: 12 }}>Add Trainer</button>
-        </form>
+        <div className="card space-y-4">
+          <h3 className="text-white">Quick Management</h3>
+          <div className="grid gap-4">
+            <Link href={`/${slug}/dashboard/membership-plans`} className="button w-full text-center" style={{ background: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)' }}>
+              Manage Membership Plans
+            </Link>
+            <Link href={`/${slug}/dashboard/equipment`} className="button w-full text-center" style={{ background: 'linear-gradient(135deg, #475569 0%, #334155 100%)' }}>
+              Equipment Tracking
+            </Link>
+          </div>
+        </div>
       </section>
     </main>
   );
