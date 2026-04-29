@@ -228,7 +228,7 @@ export default function MakeSitePage() {
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center relative z-10">
               <Link href="/signup" className="w-full sm:w-auto">
                 <StarBorder color="#FF5C73" className="w-full py-4 text-base font-bold">
-                  Start Your Free Trial
+                  Start Your Free Trial Today !!
                 </StarBorder>
               </Link>
               <a href={getWhatsAppLink("Hi GMMX, I want to see a live demo of the Microsite feature.")} target="_blank" rel="noreferrer" 
