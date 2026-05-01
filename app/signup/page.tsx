@@ -395,22 +395,32 @@ export default function SignupPage() {
   const finalRegister = async (paymentId: string | null) => {
     setRegistering(true);
     try {
-      await apiFetch("/auth/register", {
+      const response = await apiFetch<any>("/auth/register", {
         method: "POST",
         body: JSON.stringify({
-        ownerName: user.ownerName,
-        email: user.email,
-        phone: user.mobile.replace(/\D/g, ''),
-        countryCode: countryCode,
-        pin: user.pin,
-        gymName: site.gymName,
-        location: site.location,
-        subdomain: site.username,
-        hasMicrosite: site.wantMicrosite,
-        planId: selectedPlan,
-        paymentId: paymentId
-      }),
+          ownerName: user.ownerName,
+          email: user.email,
+          phone: user.mobile.replace(/\D/g, ''),
+          countryCode: countryCode,
+          pin: user.pin,
+          gymName: site.gymName,
+          location: site.location,
+          subdomain: site.username,
+          hasMicrosite: site.wantMicrosite,
+          planId: selectedPlan,
+          paymentId: paymentId
+        }),
       });
+
+      // On successful signup, store tokens and user info for auto-login
+      if (response && response.data) {
+        const { accessToken, refreshToken, user: loggedInUser } = response.data;
+        localStorage.setItem("token", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+        localStorage.setItem("user", JSON.stringify(loggedInUser));
+        localStorage.setItem("tenantSlug", site.username);
+      }
+
       setStep(STEP_DONE);
       setTimeout(() => {
         const isDev = window.location.hostname === 'localhost';
@@ -511,7 +521,30 @@ export default function SignupPage() {
                           {!checkingEmail && emailAvailable === true && <CheckCircle2 className="text-emerald-500" size={16} />}
                         </div>
                       </div>
-                      {emailAvailable === false && <p className="text-[10px] text-rose-400 mt-1 ml-1 font-bold flex items-center gap-1"><AlertCircle size={10} /> This email is already associated with an account</p>}
+                      {emailAvailable === false && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl"
+                        >
+                          <div className="flex items-start gap-3">
+                            <Crown className="text-amber-400 mt-0.5 shrink-0" size={18} />
+                            <div className="flex-1">
+                              <p className="text-sm font-black text-amber-300">Already a GMMX Member?</p>
+                              <p className="text-[11px] text-amber-400/80 mt-1 leading-relaxed">
+                                This email is registered. Want to <strong>upgrade your plan</strong>? Skip to payment and level up your gym.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => { setError(null); setStep(STEP_PAY); }}
+                                className="mt-3 px-4 py-2 bg-amber-500 text-black text-xs font-black rounded-xl hover:bg-amber-400 transition-all flex items-center gap-1.5"
+                              >
+                                <Zap size={13} /> Upgrade My Plan
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
                     </Field>
                     <Field label="Personal Mobile" icon={Phone}>
                       <div className="flex gap-2">
