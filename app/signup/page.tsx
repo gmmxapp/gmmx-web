@@ -149,9 +149,30 @@ export default function SignupPage() {
   const [couponCode, setCouponCode] = useState("");
   const [couponStatus, setCouponStatus] = useState<{ valid: boolean; message: string } | null>(null);
 
-  // Load session state on mount
+  // Clear auth storage on mount to ensure a fresh start (per user request)
   useEffect(() => {
     if (typeof window === "undefined") return;
+    
+    // Clear tokens and user info from storage to avoid auto-redirects and start fresh
+    const keysToRemove = [
+      "token", 
+      "refreshToken", 
+      "user", 
+      "tenantSlug",
+      "flutter.gmmx_logged_in",
+      "flutter.gmmx_session_user",
+      "flutter.gmmx_current_gym_id"
+    ];
+    
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    
+    // Also clear any FlutterSecureStorage keys if possible (they are prefixed in web)
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.includes("FlutterSecureStorage") || key.startsWith("flutter."))) {
+        localStorage.removeItem(key);
+      }
+    }
     
     const savedOtpSent = sessionStorage.getItem("otpSent") === "true";
     const savedIdentifier = sessionStorage.getItem("sentIdentifier");
@@ -174,18 +195,6 @@ export default function SignupPage() {
     sessionStorage.setItem("signup_user", JSON.stringify(user));
     sessionStorage.setItem("signup_site", JSON.stringify(site));
   }, [otpSent, sentIdentifier, verified, user, site]);
-
-  // Check if already logged in
-  useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    if (token && token !== "undefined" && token !== "null") {
-      const isDev = window.location.hostname === 'localhost';
-      const targetHost = isDev ? window.location.host : 'dashboard.gmmx.app';
-      // If we had the slug stored, we would use it here. 
-      // For now, redirecting to the generic login if we can't determine the slug.
-      window.location.href = `${window.location.protocol}//${targetHost}/login`;
-    }
-  }, []);
 
   // Auto-generate username from gym name
   useEffect(() => {
